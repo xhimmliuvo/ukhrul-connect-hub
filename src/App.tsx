@@ -11,6 +11,8 @@ import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
 import Events from "./pages/Events";
 import Services from "./pages/Services";
+import Businesses from "./pages/Businesses";
+import BusinessDetail from "./pages/BusinessDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
               <Route path="/saved" element={<Saved />} />
               <Route path="/events" element={<Events />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/businesses" element={<Businesses />} />
+              <Route path="/businesses/:slug" element={<BusinessDetail />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
