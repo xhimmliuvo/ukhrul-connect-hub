@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      businesses: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          category_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          featured: boolean | null
+          id: string
+          images: string[] | null
+          location_lat: number | null
+          location_lng: number | null
+          name: string
+          opening_hours: Json | null
+          owner_id: string | null
+          phone: string | null
+          popularity_score: number | null
+          rating: number | null
+          review_count: number | null
+          service_area_id: string | null
+          short_description: string | null
+          slug: string
+          updated_at: string | null
+          verified: boolean | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name: string
+          opening_hours?: Json | null
+          owner_id?: string | null
+          phone?: string | null
+          popularity_score?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug: string
+          updated_at?: string | null
+          verified?: boolean | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string
+          opening_hours?: Json | null
+          owner_id?: string | null
+          phone?: string | null
+          popularity_score?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug?: string
+          updated_at?: string | null
+          verified?: boolean | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "businesses_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           active: boolean | null
@@ -93,6 +195,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reviews: {
+        Row: {
+          business_id: string | null
+          comment: string | null
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          images: string[] | null
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_id?: string | null
+          comment?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          images?: string[] | null
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string | null
+          comment?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          images?: string[] | null
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       service_areas: {
         Row: {
