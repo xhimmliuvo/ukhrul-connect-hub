@@ -208,6 +208,102 @@ export type Database = {
           },
         ]
       }
+      places: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          best_time_to_visit: string | null
+          category_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          description: string | null
+          difficulty_level: string | null
+          entry_fee: number | null
+          facilities: string[] | null
+          featured: boolean | null
+          id: string
+          images: string[] | null
+          location_lat: number | null
+          location_lng: number | null
+          name: string
+          opening_hours: Json | null
+          rating: number | null
+          review_count: number | null
+          service_area_id: string | null
+          short_description: string | null
+          slug: string
+          tips: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          best_time_to_visit?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          entry_fee?: number | null
+          facilities?: string[] | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name: string
+          opening_hours?: Json | null
+          rating?: number | null
+          review_count?: number | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug: string
+          tips?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          best_time_to_visit?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          entry_fee?: number | null
+          facilities?: string[] | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string
+          opening_hours?: Json | null
+          rating?: number | null
+          review_count?: number | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug?: string
+          tips?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "places_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "places_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       popular_packages: {
         Row: {
           business_id: string
