@@ -18,12 +18,15 @@ export type Database = {
         Row: {
           active: boolean | null
           address: string | null
+          business_type: string | null
+          can_take_bookings: boolean | null
           category_id: string | null
           cover_image: string | null
           created_at: string | null
           description: string | null
           email: string | null
           featured: boolean | null
+          has_products: boolean | null
           id: string
           images: string[] | null
           location_lat: number | null
@@ -46,12 +49,15 @@ export type Database = {
         Insert: {
           active?: boolean | null
           address?: string | null
+          business_type?: string | null
+          can_take_bookings?: boolean | null
           category_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
           featured?: boolean | null
+          has_products?: boolean | null
           id?: string
           images?: string[] | null
           location_lat?: number | null
@@ -74,12 +80,15 @@ export type Database = {
         Update: {
           active?: boolean | null
           address?: string | null
+          business_type?: string | null
+          can_take_bookings?: boolean | null
           category_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
           featured?: boolean | null
+          has_products?: boolean | null
           id?: string
           images?: string[] | null
           location_lat?: number | null
@@ -148,6 +157,144 @@ export type Database = {
           type?: Database["public"]["Enums"]["category_type"]
         }
         Relationships: []
+      }
+      dropee_orders: {
+        Row: {
+          business_id: string
+          business_name: string
+          business_type: string
+          created_at: string | null
+          details: Json
+          id: string
+          order_type: string
+          status: string | null
+          updated_at: string | null
+          user_contact: string
+          user_id: string | null
+        }
+        Insert: {
+          business_id: string
+          business_name: string
+          business_type: string
+          created_at?: string | null
+          details?: Json
+          id?: string
+          order_type: string
+          status?: string | null
+          updated_at?: string | null
+          user_contact: string
+          user_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          business_name?: string
+          business_type?: string
+          created_at?: string | null
+          details?: Json
+          id?: string
+          order_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_contact?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dropee_orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      popular_packages: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image: string | null
+          name: string
+          starting_price: number | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name: string
+          starting_price?: number | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          starting_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "popular_packages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          available: boolean | null
+          business_id: string
+          category: string | null
+          created_at: string | null
+          description: string | null
+          discount_price: number | null
+          id: string
+          image: string | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          business_id: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          image?: string | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          business_id?: string
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          image?: string | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
