@@ -21,7 +21,12 @@ import {
   BadgeCheck,
   Share2,
   Navigation,
+  Truck,
 } from 'lucide-react';
+import { ProductsSection } from '@/components/business/ProductsSection';
+import { BookingSection } from '@/components/business/BookingSection';
+import { AgencyWorkflowSection } from '@/components/business/AgencyWorkflowSection';
+import { DropeeOrderModal } from '@/components/business/DropeeOrderModal';
 
 interface Business {
   id: string;
@@ -41,13 +46,35 @@ interface Business {
   website: string | null;
   location_lat: number | null;
   location_lng: number | null;
+  business_type: string;
+  has_products: boolean;
+  can_take_bookings: boolean;
   categories: {
     name: string;
+    slug: string;
     color: string | null;
   } | null;
   service_areas: {
     name: string;
   } | null;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  discount_price: number | null;
+  image: string | null;
+  category: string | null;
+}
+
+interface Package {
+  id: string;
+  name: string;
+  description: string | null;
+  starting_price: number | null;
+  image: string | null;
 }
 
 interface Review {
@@ -64,7 +91,10 @@ export default function BusinessDetail() {
   const { isSaved, toggleSave } = useSavedItems();
   const [business, setBusiness] = useState<Business | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dropeeModalOpen, setDropeeModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -75,8 +105,8 @@ export default function BusinessDetail() {
         .select(`
           id, name, slug, description, short_description, cover_image, images,
           rating, review_count, verified, address, phone, whatsapp, email, website,
-          location_lat, location_lng,
-          categories (name, color),
+          location_lat, location_lng, business_type, has_products, can_take_bookings,
+          categories (name, slug, color),
           service_areas (name)
         `)
         .eq('slug', slug)
@@ -101,6 +131,27 @@ export default function BusinessDetail() {
           .limit(10);
 
         setReviews(reviewsData || []);
+
+        // Fetch products if applicable
+        if (data.has_products) {
+          const { data: productsData } = await supabase
+            .from('products')
+            .select('id, name, description, price, discount_price, image, category')
+            .eq('business_id', data.id)
+            .eq('available', true);
+
+          setProducts(productsData || []);
+        }
+
+        // Fetch packages for agencies
+        if (data.business_type === 'agency') {
+          const { data: packagesData } = await supabase
+            .from('popular_packages')
+            .select('id, name, description, starting_price, image')
+            .eq('business_id', data.id);
+
+          setPackages(packagesData || []);
+        }
       }
       
       setLoading(false);
@@ -166,6 +217,65 @@ export default function BusinessDetail() {
       await navigator.clipboard.writeText(window.location.href);
       toast.success('Link copied to clipboard');
     }
+  };
+
+  const handleProductOrder = (product: Product) => {
+    setDropeeModalOpen(true);
+  };
+
+  const handleBookSlot = (booking: { date: Date; timeSlot: string; people: number; rooms?: number }) => {
+    toast.success(`Booking request for ${booking.people} people on ${booking.date.toLocaleDateString()}`);
+  };
+
+  const renderDynamicSection = () => {
+    if (!business) return null;
+
+    const businessType = business.business_type as 'product' | 'cafe' | 'restaurant' | 'hotel' | 'agency';
+
+    // Products section for product businesses or businesses with products
+    if (businessType === 'product' || business.has_products) {
+      return (
+        <Card>
+          <CardContent className="p-6">
+            <ProductsSection 
+              products={products} 
+              onOrderProduct={handleProductOrder}
+            />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Booking section for cafes, restaurants, hotels
+    if (['cafe', 'restaurant', 'hotel'].includes(businessType) && business.can_take_bookings) {
+      return (
+        <Card>
+          <CardContent className="p-6">
+            <BookingSection 
+              businessType={businessType as 'cafe' | 'restaurant' | 'hotel'}
+              onBookSlot={handleBookSlot}
+            />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Agency workflow section
+    if (businessType === 'agency') {
+      return (
+        <Card>
+          <CardContent className="p-6">
+            <AgencyWorkflowSection
+              packages={packages}
+              onContactAgency={() => setDropeeModalOpen(true)}
+              onSelectPackage={() => setDropeeModalOpen(true)}
+            />
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return null;
   };
 
   if (loading) {
@@ -286,19 +396,27 @@ export default function BusinessDetail() {
             )}
 
             {/* Quick Actions */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-2 mt-6 flex-wrap">
               {business.phone && (
-                <Button className="flex-1 gap-2" onClick={handleCall}>
+                <Button className="flex-1 min-w-[100px] gap-2" onClick={handleCall}>
                   <Phone className="h-4 w-4" />
                   Call
                 </Button>
               )}
               {business.whatsapp && (
-                <Button variant="outline" className="flex-1 gap-2" onClick={handleWhatsApp}>
+                <Button variant="outline" className="flex-1 min-w-[100px] gap-2" onClick={handleWhatsApp}>
                   <MessageCircle className="h-4 w-4" />
                   WhatsApp
                 </Button>
               )}
+              <Button 
+                variant="default" 
+                className="flex-1 min-w-[140px] gap-2 bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => setDropeeModalOpen(true)}
+              >
+                <Truck className="h-4 w-4" />
+                Order with #Dropee
+              </Button>
               <Button variant="outline" size="icon" onClick={handleDirections}>
                 <Navigation className="h-4 w-4" />
               </Button>
@@ -319,6 +437,9 @@ export default function BusinessDetail() {
             </CardContent>
           </Card>
         )}
+
+        {/* Dynamic Section based on business type */}
+        {renderDynamicSection()}
 
         {/* Contact Info */}
         <Card>
@@ -414,6 +535,19 @@ export default function BusinessDetail() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Dropee Order Modal */}
+      <DropeeOrderModal
+        isOpen={dropeeModalOpen}
+        onClose={() => setDropeeModalOpen(false)}
+        business={{
+          id: business.id,
+          name: business.name,
+          business_type: business.business_type,
+        }}
+        products={products}
+        packages={packages}
+      />
     </div>
   );
 }
