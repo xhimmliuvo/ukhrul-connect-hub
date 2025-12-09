@@ -7,6 +7,8 @@ import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { LocationSelector } from '@/components/LocationSelector';
 import { BusinessCard } from '@/components/BusinessCard';
+import { PlaceCard } from '@/components/PlaceCard';
+import { EventCard } from '@/components/EventCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,12 +49,46 @@ interface Business {
   } | null;
 }
 
+interface Place {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  cover_image: string | null;
+  rating: number | null;
+  review_count: number | null;
+  featured: boolean;
+  address: string | null;
+  entry_fee: number | null;
+  categories: {
+    name: string;
+    color: string | null;
+  } | null;
+}
+
+interface Event {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  cover_image: string | null;
+  event_date: string;
+  start_time: string | null;
+  venue: string | null;
+  featured: boolean;
+  entry_fee: number | null;
+}
+
 export default function Index() {
   const { user, loading: authLoading } = useAuth();
   const { currentArea, loading: areaLoading, geoStatus, detectLocation } = useServiceAreaContext();
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loadingBusinesses, setLoadingBusinesses] = useState(true);
+  const [loadingPlaces, setLoadingPlaces] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   // Show location selector if no area selected after initial load
   useEffect(() => {
@@ -68,12 +104,15 @@ export default function Index() {
     }
   }, [geoStatus]);
 
-  // Fetch businesses for current area
+  // Fetch businesses, places, and events for current area
   useEffect(() => {
-    async function fetchBusinesses() {
+    async function fetchData() {
       setLoadingBusinesses(true);
+      setLoadingPlaces(true);
+      setLoadingEvents(true);
       
-      let query = supabase
+      // Fetch businesses
+      let businessQuery = supabase
         .from('businesses')
         .select(`
           id, name, slug, short_description, cover_image,
@@ -85,16 +124,50 @@ export default function Index() {
         .order('rating', { ascending: false })
         .limit(6);
 
+      // Fetch places
+      let placeQuery = supabase
+        .from('places')
+        .select(`
+          id, name, slug, short_description, cover_image,
+          rating, review_count, featured, address, entry_fee,
+          categories (name, color)
+        `)
+        .eq('active', true)
+        .order('featured', { ascending: false })
+        .order('rating', { ascending: false })
+        .limit(4);
+
+      // Fetch upcoming events
+      const today = new Date().toISOString().split('T')[0];
+      let eventQuery = supabase
+        .from('events')
+        .select('id, name, slug, short_description, cover_image, event_date, start_time, venue, featured, entry_fee')
+        .eq('active', true)
+        .gte('event_date', today)
+        .order('event_date', { ascending: true })
+        .limit(3);
+
       if (currentArea) {
-        query = query.eq('service_area_id', currentArea.id);
+        businessQuery = businessQuery.eq('service_area_id', currentArea.id);
+        placeQuery = placeQuery.eq('service_area_id', currentArea.id);
+        eventQuery = eventQuery.eq('service_area_id', currentArea.id);
       }
 
-      const { data } = await query;
-      setBusinesses(data || []);
+      const [businessRes, placeRes, eventRes] = await Promise.all([
+        businessQuery,
+        placeQuery,
+        eventQuery
+      ]);
+
+      setBusinesses(businessRes.data || []);
+      setPlaces(placeRes.data || []);
+      setEvents(eventRes.data || []);
       setLoadingBusinesses(false);
+      setLoadingPlaces(false);
+      setLoadingEvents(false);
     }
 
-    fetchBusinesses();
+    fetchData();
   }, [currentArea]);
 
   if (authLoading || areaLoading) {
@@ -257,25 +330,47 @@ export default function Index() {
           </section>
         )}
 
-        {/* Placeholder sections */}
+        {/* Featured Places */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Tourist Places</h2>
-            <Button variant="link" size="sm" className="text-primary">
-              View all
-            </Button>
+            <Link to="/places">
+              <Button variant="link" size="sm" className="text-primary">
+                View all
+              </Button>
+            </Link>
           </div>
-          <Card className="border-dashed">
-            <CardContent className="p-8 text-center">
-              <Mountain className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Coming soon</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Discover waterfalls, peaks, and cultural sites
-              </p>
-            </CardContent>
-          </Card>
+          
+          {loadingPlaces ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-24 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : places.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="p-8 text-center">
+                <Mountain className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No places in this area yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Discover waterfalls, peaks, and cultural sites
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {places.slice(0, 4).map((place) => (
+                <PlaceCard key={place.id} place={place} variant="compact" />
+              ))}
+            </div>
+          )}
         </section>
 
+        {/* Upcoming Events */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Upcoming Events</h2>
@@ -285,15 +380,36 @@ export default function Index() {
               </Button>
             </Link>
           </div>
-          <Card className="border-dashed">
-            <CardContent className="p-8 text-center">
-              <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No upcoming events</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Check back for festivals and community events
-              </p>
-            </CardContent>
-          </Card>
+          
+          {loadingEvents ? (
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="flex gap-4 p-4 border rounded-lg">
+                  <Skeleton className="h-16 w-16 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : events.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="p-8 text-center">
+                <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No upcoming events</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Check back for festivals and community events
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {events.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 

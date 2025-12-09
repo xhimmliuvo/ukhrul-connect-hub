@@ -14,11 +14,11 @@ interface Place {
   slug: string;
   short_description: string | null;
   cover_image: string | null;
-  rating: number;
-  review_count: number;
+  rating: number | null;
+  review_count: number | null;
   featured: boolean;
   address: string | null;
-  difficulty_level: string | null;
+  difficulty_level?: string | null;
   entry_fee: number | null;
   categories?: {
     name: string;
@@ -130,7 +130,7 @@ export function PlaceCard({ place, variant = 'default' }: PlaceCardProps) {
             </div>
 
             {/* Rating */}
-            {place.review_count > 0 && (
+            {(place.review_count ?? 0) > 0 && (
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Star className="h-3.5 w-3.5 fill-primary text-primary" />
                 <span className="text-sm font-medium text-foreground">
