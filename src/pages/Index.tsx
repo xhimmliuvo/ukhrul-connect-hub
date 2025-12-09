@@ -9,11 +9,12 @@ import { LocationSelector } from '@/components/LocationSelector';
 import { BusinessCard } from '@/components/BusinessCard';
 import { PlaceCard } from '@/components/PlaceCard';
 import { EventCard } from '@/components/EventCard';
+import { PromotionalBanner } from '@/components/PromotionalBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Search, 
   MapPin, 
   Store, 
@@ -247,6 +248,9 @@ export default function Index() {
             </Link>
           ))}
         </div>
+
+        {/* Promotional Banner */}
+        <PromotionalBanner page="explore" />
 
         {/* Current Location Info */}
         {currentArea && (
