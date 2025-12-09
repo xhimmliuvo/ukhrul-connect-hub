@@ -4,6 +4,7 @@ import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { EventCard } from '@/components/EventCard';
+import { PromotionalBanner } from '@/components/PromotionalBanner';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -88,6 +89,9 @@ export default function Events() {
             className="pl-10 h-12 bg-secondary border-0"
           />
         </div>
+
+        {/* Promotional Banner */}
+        <PromotionalBanner page="events" />
 
         {loading ? (
           <div className="space-y-4">

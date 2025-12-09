@@ -4,6 +4,7 @@ import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { PlaceCard } from '@/components/PlaceCard';
+import { PromotionalBanner } from '@/components/PromotionalBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -150,6 +151,9 @@ export default function Places() {
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
+
+        {/* Promotional Banner */}
+        <PromotionalBanner page="places" />
 
         {loading ? (
           <div className="grid grid-cols-2 gap-4">

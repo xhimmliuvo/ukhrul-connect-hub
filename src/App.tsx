@@ -16,6 +16,7 @@ import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
 import Places from "./pages/Places";
 import PlaceDetail from "./pages/PlaceDetail";
+import AdminBanners from "./pages/AdminBanners";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/businesses/:slug" element={<BusinessDetail />} />
               <Route path="/places" element={<Places />} />
               <Route path="/places/:slug" element={<PlaceDetail />} />
+              <Route path="/admin/banners" element={<AdminBanners />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
