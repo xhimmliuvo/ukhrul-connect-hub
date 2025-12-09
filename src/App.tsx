@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import Services from "./pages/Services";
 import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved" element={<Saved />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/events/:slug" element={<EventDetail />} />
               <Route path="/services" element={<Services />} />
               <Route path="/businesses" element={<Businesses />} />
               <Route path="/businesses/:slug" element={<BusinessDetail />} />

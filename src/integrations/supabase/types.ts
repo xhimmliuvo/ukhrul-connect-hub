@@ -208,6 +208,99 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          category_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          description: string | null
+          end_time: string | null
+          entry_fee: number | null
+          event_date: string
+          featured: boolean | null
+          id: string
+          images: string[] | null
+          location_lat: number | null
+          location_lng: number | null
+          name: string
+          organizer: string | null
+          organizer_contact: string | null
+          service_area_id: string | null
+          short_description: string | null
+          slug: string
+          start_time: string | null
+          updated_at: string | null
+          venue: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          entry_fee?: number | null
+          event_date: string
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name: string
+          organizer?: string | null
+          organizer_contact?: string | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug: string
+          start_time?: string | null
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          entry_fee?: number | null
+          event_date?: string
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          location_lat?: number | null
+          location_lng?: number | null
+          name?: string
+          organizer?: string | null
+          organizer_contact?: string | null
+          service_area_id?: string | null
+          short_description?: string | null
+          slug?: string
+          start_time?: string | null
+          updated_at?: string | null
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       places: {
         Row: {
           active: boolean | null
