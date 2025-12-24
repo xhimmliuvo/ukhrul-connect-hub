@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
@@ -21,8 +20,6 @@ import {
   Mountain, 
   Calendar, 
   Truck,
-  LogIn,
-  User,
   Loader2
 } from 'lucide-react';
 
@@ -81,7 +78,6 @@ interface Event {
 }
 
 export default function Index() {
-  const { user, loading: authLoading } = useAuth();
   const { currentArea, loading: areaLoading, geoStatus, detectLocation } = useServiceAreaContext();
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -171,7 +167,7 @@ export default function Index() {
     fetchData();
   }, [currentArea]);
 
-  if (authLoading || areaLoading) {
+  if (areaLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -195,30 +191,14 @@ export default function Index() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Header with Auth */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              Discover Ukhrul
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Shop, Explore & Travel Locally
-            </p>
-          </div>
-          {user ? (
-            <Link to="/profile">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="gap-2">
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Button>
-            </Link>
-          )}
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Discover Ukhrul
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Shop, Explore & Travel Locally
+          </p>
         </div>
 
         {/* Search Bar */}
