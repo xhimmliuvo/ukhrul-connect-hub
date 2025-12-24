@@ -16,8 +16,19 @@ import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
 import Places from "./pages/Places";
 import PlaceDetail from "./pages/PlaceDetail";
-import AdminBanners from "./pages/AdminBanners";
 import NotFound from "./pages/NotFound";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminBusinesses from "./pages/admin/AdminBusinesses";
+import AdminPlaces from "./pages/admin/AdminPlaces";
+import AdminEvents from "./pages/admin/AdminEvents";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminServiceAreas from "./pages/admin/AdminServiceAreas";
+import AdminBanners from "./pages/admin/AdminBanners";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminReviews from "./pages/admin/AdminReviews";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +52,19 @@ const App = () => (
               <Route path="/businesses/:slug" element={<BusinessDetail />} />
               <Route path="/places" element={<Places />} />
               <Route path="/places/:slug" element={<PlaceDetail />} />
+              
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/businesses" element={<AdminBusinesses />} />
+              <Route path="/admin/places" element={<AdminPlaces />} />
+              <Route path="/admin/events" element={<AdminEvents />} />
+              <Route path="/admin/categories" element={<AdminCategories />} />
+              <Route path="/admin/service-areas" element={<AdminServiceAreas />} />
               <Route path="/admin/banners" element={<AdminBanners />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/reviews" element={<AdminReviews />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
