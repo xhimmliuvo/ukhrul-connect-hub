@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ServiceAreaProvider } from "@/contexts/ServiceAreaContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import Saved from "./pages/Saved";
 import Events from "./pages/Events";
@@ -16,6 +17,10 @@ import Businesses from "./pages/Businesses";
 import BusinessDetail from "./pages/BusinessDetail";
 import Places from "./pages/Places";
 import PlaceDetail from "./pages/PlaceDetail";
+import Search from "./pages/Search";
+import Orders from "./pages/Orders";
+import MyReviews from "./pages/MyReviews";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 // Admin pages
@@ -43,8 +48,13 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/saved" element={<Saved />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/reviews" element={<MyReviews />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:slug" element={<EventDetail />} />
               <Route path="/services" element={<Services />} />

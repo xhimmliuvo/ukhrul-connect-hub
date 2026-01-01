@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -30,7 +31,6 @@ interface MenuItem {
   label: string;
   path: string;
   requiresAuth?: boolean;
-  adminOnly?: boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -41,12 +41,9 @@ const menuItems: MenuItem[] = [
   { icon: Settings, label: 'Settings', path: '/settings', requiresAuth: true },
 ];
 
-const adminItems: MenuItem[] = [
-  { icon: Shield, label: 'Manage Banners', path: '/admin/banners', adminOnly: true },
-];
-
 export function HamburgerMenu() {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRoles();
   const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -127,25 +124,22 @@ export function HamburgerMenu() {
           ))}
         </nav>
 
-        {/* Admin Section */}
-        {user && (
+        {/* Admin Section - Only show for admins */}
+        {user && isAdmin && (
           <>
             <Separator />
             <nav className="py-2">
-              {adminItems.map(({ icon: Icon, label, path }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium text-foreground">{label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </Link>
-              ))}
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Admin Panel</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
             </nav>
           </>
         )}
