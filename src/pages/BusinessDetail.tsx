@@ -84,6 +84,7 @@ interface Review {
   comment: string | null;
   created_at: string;
   user_id: string;
+  reviewer_name?: string | null;
 }
 
 export default function BusinessDetail() {
@@ -132,7 +133,23 @@ export default function BusinessDetail() {
           .order('created_at', { ascending: false })
           .limit(10);
 
-        setReviews(reviewsData || []);
+        // Fetch profile names for reviewers
+        if (reviewsData && reviewsData.length > 0) {
+          const userIds = reviewsData.map(r => r.user_id);
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+          
+          const profileMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
+          const reviewsWithNames = reviewsData.map(r => ({
+            ...r,
+            reviewer_name: profileMap.get(r.user_id) || null
+          }));
+          setReviews(reviewsWithNames);
+        } else {
+          setReviews([]);
+        }
 
         // Fetch products if applicable
         if (data.has_products) {
@@ -509,11 +526,15 @@ export default function BusinessDetail() {
                   <div key={review.id}>
                     <div className="flex items-start gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarFallback>
+                          {review.reviewer_name?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-medium text-foreground">User</p>
+                          <p className="font-medium text-foreground">
+                            {review.reviewer_name || 'Anonymous'}
+                          </p>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-primary text-primary" />
                             <span className="text-sm font-medium">{review.rating}</span>
@@ -556,7 +577,7 @@ export default function BusinessDetail() {
         open={reviewModalOpen}
         onOpenChange={setReviewModalOpen}
         businessId={business.id}
-        businessName={business.name}
+        itemName={business.name}
         onSuccess={async () => {
           const { data: reviewsData } = await supabase
             .from('reviews')
@@ -564,7 +585,22 @@ export default function BusinessDetail() {
             .eq('business_id', business.id)
             .order('created_at', { ascending: false })
             .limit(10);
-          setReviews(reviewsData || []);
+          
+          if (reviewsData && reviewsData.length > 0) {
+            const userIds = reviewsData.map(r => r.user_id);
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('id, full_name')
+              .in('id', userIds);
+            
+            const profileMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
+            setReviews(reviewsData.map(r => ({
+              ...r,
+              reviewer_name: profileMap.get(r.user_id) || null
+            })));
+          } else {
+            setReviews([]);
+          }
         }}
       />
     </div>

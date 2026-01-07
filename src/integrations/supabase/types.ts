@@ -591,6 +591,7 @@ export type Database = {
           helpful_count: number | null
           id: string
           images: string[] | null
+          place_id: string | null
           rating: number
           updated_at: string | null
           user_id: string
@@ -602,6 +603,7 @@ export type Database = {
           helpful_count?: number | null
           id?: string
           images?: string[] | null
+          place_id?: string | null
           rating: number
           updated_at?: string | null
           user_id: string
@@ -613,6 +615,7 @@ export type Database = {
           helpful_count?: number | null
           id?: string
           images?: string[] | null
+          place_id?: string | null
           rating?: number
           updated_at?: string | null
           user_id?: string
@@ -623,6 +626,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "places"
             referencedColumns: ["id"]
           },
         ]

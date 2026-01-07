@@ -63,6 +63,7 @@ interface Review {
   comment: string | null;
   created_at: string;
   user_id: string;
+  reviewer_name?: string | null;
 }
 
 const facilityIcons: Record<string, React.ElementType> = {
@@ -107,9 +108,30 @@ export default function PlaceDetail() {
       if (data) {
         setPlace(data as Place);
 
-        // Fetch reviews (using business_id field for now - we could add place_id to reviews later)
-        // For now, just show empty reviews
-        setReviews([]);
+        // Fetch reviews for this place
+        const { data: reviewsData } = await supabase
+          .from('reviews')
+          .select('id, rating, comment, created_at, user_id')
+          .eq('place_id', data.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        // Fetch profile names for reviewers
+        if (reviewsData && reviewsData.length > 0) {
+          const userIds = reviewsData.map(r => r.user_id);
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+          
+          const profileMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
+          setReviews(reviewsData.map(r => ({
+            ...r,
+            reviewer_name: profileMap.get(r.user_id) || null
+          })));
+        } else {
+          setReviews([]);
+        }
       }
       
       setLoading(false);
@@ -469,11 +491,15 @@ export default function PlaceDetail() {
                   <div key={review.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarFallback>
+                          {review.reviewer_name?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">User</span>
+                          <span className="font-medium text-foreground">
+                            {review.reviewer_name || 'Anonymous'}
+                          </span>
                           <div className="flex items-center">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star
@@ -509,12 +535,31 @@ export default function PlaceDetail() {
         <ReviewForm
           open={reviewModalOpen}
           onOpenChange={setReviewModalOpen}
-          businessId={place.id}
-          businessName={place.name}
+          placeId={place.id}
+          itemName={place.name}
           onSuccess={async () => {
-            // Refresh reviews - note: reviews table uses business_id, 
-            // so place reviews would need a place_id column to be fully functional
-            setReviews([]);
+            const { data: reviewsData } = await supabase
+              .from('reviews')
+              .select('id, rating, comment, created_at, user_id')
+              .eq('place_id', place.id)
+              .order('created_at', { ascending: false })
+              .limit(10);
+            
+            if (reviewsData && reviewsData.length > 0) {
+              const userIds = reviewsData.map(r => r.user_id);
+              const { data: profilesData } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', userIds);
+              
+              const profileMap = new Map(profilesData?.map(p => [p.id, p.full_name]) || []);
+              setReviews(reviewsData.map(r => ({
+                ...r,
+                reviewer_name: profileMap.get(r.user_id) || null
+              })));
+            } else {
+              setReviews([]);
+            }
           }}
         />
       )}
