@@ -27,6 +27,7 @@ import { ProductsSection } from '@/components/business/ProductsSection';
 import { BookingSection } from '@/components/business/BookingSection';
 import { AgencyWorkflowSection } from '@/components/business/AgencyWorkflowSection';
 import { DropeeOrderModal } from '@/components/business/DropeeOrderModal';
+import { ReviewForm } from '@/components/ReviewForm';
 
 interface Business {
   id: string;
@@ -95,6 +96,7 @@ export default function BusinessDetail() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [dropeeModalOpen, setDropeeModalOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -491,7 +493,7 @@ export default function BusinessDetail() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-lg">Reviews</CardTitle>
             {user && (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setReviewModalOpen(true)}>
                 Write a review
               </Button>
             )}
@@ -547,6 +549,23 @@ export default function BusinessDetail() {
         }}
         products={products}
         packages={packages}
+      />
+
+      {/* Review Modal */}
+      <ReviewForm
+        open={reviewModalOpen}
+        onOpenChange={setReviewModalOpen}
+        businessId={business.id}
+        businessName={business.name}
+        onSuccess={async () => {
+          const { data: reviewsData } = await supabase
+            .from('reviews')
+            .select('id, rating, comment, created_at, user_id')
+            .eq('business_id', business.id)
+            .order('created_at', { ascending: false })
+            .limit(10);
+          setReviews(reviewsData || []);
+        }}
       />
     </div>
   );
