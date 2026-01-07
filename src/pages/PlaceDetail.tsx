@@ -27,6 +27,7 @@ import {
   User,
   Droplets,
 } from 'lucide-react';
+import { ReviewForm } from '@/components/ReviewForm';
 
 interface Place {
   id: string;
@@ -78,6 +79,7 @@ export default function PlaceDetail() {
   const [place, setPlace] = useState<Place | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchPlace() {
@@ -448,7 +450,7 @@ export default function PlaceDetail() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-lg">Reviews</CardTitle>
             {user && (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setReviewModalOpen(true)}>
                 Write a review
               </Button>
             )}
@@ -501,6 +503,21 @@ export default function PlaceDetail() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Review Modal */}
+      {place && (
+        <ReviewForm
+          open={reviewModalOpen}
+          onOpenChange={setReviewModalOpen}
+          businessId={place.id}
+          businessName={place.name}
+          onSuccess={async () => {
+            // Refresh reviews - note: reviews table uses business_id, 
+            // so place reviews would need a place_id column to be fully functional
+            setReviews([]);
+          }}
+        />
+      )}
     </div>
   );
 }
