@@ -22,12 +22,13 @@ type ReviewFormData = z.infer<typeof reviewSchema>;
 interface ReviewFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  businessId: string;
-  businessName: string;
+  businessId?: string;
+  placeId?: string;
+  itemName: string;
   onSuccess?: () => void;
 }
 
-export function ReviewForm({ open, onOpenChange, businessId, businessName, onSuccess }: ReviewFormProps) {
+export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, onSuccess }: ReviewFormProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -51,7 +52,8 @@ export function ReviewForm({ open, onOpenChange, businessId, businessName, onSuc
     setIsSubmitting(true);
 
     const { error } = await supabase.from('reviews').insert({
-      business_id: businessId,
+      business_id: businessId || null,
+      place_id: placeId || null,
       user_id: user.id,
       rating: data.rating,
       comment: data.comment || null,
@@ -80,7 +82,7 @@ export function ReviewForm({ open, onOpenChange, businessId, businessName, onSuc
         <DialogHeader>
           <DialogTitle>Write a Review</DialogTitle>
           <DialogDescription>
-            Share your experience at {businessName}
+            Share your experience at {itemName}
           </DialogDescription>
         </DialogHeader>
 
