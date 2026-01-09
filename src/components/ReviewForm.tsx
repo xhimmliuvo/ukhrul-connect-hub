@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,13 +11,23 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { toast } from 'sonner';
 import { Star, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ReviewImageUpload } from './ReviewImageUpload';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, 'Please select a rating').max(5),
   comment: z.string().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type ReviewFormData = z.infer<typeof reviewSchema>;
+
+export interface ReviewData {
+  id: string;
+  rating: number;
+  comment: string | null;
+  images: string[] | null;
+  user_id: string;
+}
 
 interface ReviewFormProps {
   open: boolean;
@@ -26,9 +36,18 @@ interface ReviewFormProps {
   placeId?: string;
   itemName: string;
   onSuccess?: () => void;
+  editReview?: ReviewData | null;
 }
 
-export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, onSuccess }: ReviewFormProps) {
+export function ReviewForm({ 
+  open, 
+  onOpenChange, 
+  businessId, 
+  placeId, 
+  itemName, 
+  onSuccess,
+  editReview 
+}: ReviewFormProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -38,10 +57,29 @@ export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, 
     defaultValues: {
       rating: 0,
       comment: '',
+      images: [],
     },
   });
 
+  // Reset form when editReview changes
+  useEffect(() => {
+    if (editReview) {
+      form.reset({
+        rating: editReview.rating,
+        comment: editReview.comment || '',
+        images: editReview.images || [],
+      });
+    } else {
+      form.reset({
+        rating: 0,
+        comment: '',
+        images: [],
+      });
+    }
+  }, [editReview, form]);
+
   const watchedRating = form.watch('rating');
+  const watchedImages = form.watch('images') || [];
 
   const handleSubmit = async (data: ReviewFormData) => {
     if (!user) {
@@ -51,26 +89,50 @@ export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, 
 
     setIsSubmitting(true);
 
-    const { error } = await supabase.from('reviews').insert({
-      business_id: businessId || null,
-      place_id: placeId || null,
-      user_id: user.id,
-      rating: data.rating,
-      comment: data.comment || null,
-    });
+    if (editReview) {
+      // Update existing review
+      const { error } = await supabase
+        .from('reviews')
+        .update({
+          rating: data.rating,
+          comment: data.comment || null,
+          images: data.images || [],
+        })
+        .eq('id', editReview.id);
 
-    setIsSubmitting(false);
+      setIsSubmitting(false);
 
-    if (error) {
-      if (error.code === '23505') {
-        toast.error('You have already reviewed this business');
-      } else {
-        toast.error('Failed to submit review');
+      if (error) {
+        toast.error('Failed to update review');
+        return;
       }
-      return;
+
+      toast.success('Review updated!');
+    } else {
+      // Insert new review
+      const { error } = await supabase.from('reviews').insert({
+        business_id: businessId || null,
+        place_id: placeId || null,
+        user_id: user.id,
+        rating: data.rating,
+        comment: data.comment || null,
+        images: data.images || [],
+      });
+
+      setIsSubmitting(false);
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('You have already reviewed this');
+        } else {
+          toast.error('Failed to submit review');
+        }
+        return;
+      }
+
+      toast.success('Review submitted!');
     }
 
-    toast.success('Review submitted!');
     form.reset();
     onOpenChange(false);
     onSuccess?.();
@@ -80,7 +142,7 @@ export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
+          <DialogTitle>{editReview ? 'Edit Review' : 'Write a Review'}</DialogTitle>
           <DialogDescription>
             Share your experience at {itemName}
           </DialogDescription>
@@ -140,6 +202,24 @@ export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, 
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Photos (Optional)</FormLabel>
+                  <FormControl>
+                    <ReviewImageUpload
+                      images={watchedImages}
+                      onChange={field.onChange}
+                      maxImages={3}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="flex gap-3 justify-end">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
@@ -148,10 +228,10 @@ export function ReviewForm({ open, onOpenChange, businessId, placeId, itemName, 
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    {editReview ? 'Updating...' : 'Submitting...'}
                   </>
                 ) : (
-                  'Submit Review'
+                  editReview ? 'Update Review' : 'Submit Review'
                 )}
               </Button>
             </div>

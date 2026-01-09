@@ -70,9 +70,18 @@ export default function Auth() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate('/');
-    }
+    const checkUserAndRedirect = async () => {
+      if (user && !authLoading) {
+        // Check if user has admin role
+        const { data: roles } = await supabase.rpc('get_user_roles', { _user_id: user.id });
+        if (roles && roles.includes('admin')) {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      }
+    };
+    checkUserAndRedirect();
   }, [user, authLoading, navigate]);
 
   const handleSignIn = async (data: SignInFormData) => {
@@ -90,7 +99,7 @@ export default function Auth() {
     }
 
     toast.success('Welcome back!');
-    navigate('/');
+    // Navigation will be handled by the useEffect above after auth state changes
   };
 
   const handleSignUp = async (data: SignUpFormData) => {
@@ -108,7 +117,7 @@ export default function Auth() {
     }
 
     toast.success('Account created successfully!');
-    navigate('/');
+    // Navigation will be handled by the useEffect above after auth state changes
   };
 
   const handleForgotPassword = async (data: ForgotPasswordFormData) => {

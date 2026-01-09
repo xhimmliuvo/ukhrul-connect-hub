@@ -22,12 +22,25 @@ import {
   Share2,
   Navigation,
   Truck,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ProductsSection } from '@/components/business/ProductsSection';
 import { BookingSection } from '@/components/business/BookingSection';
 import { AgencyWorkflowSection } from '@/components/business/AgencyWorkflowSection';
 import { DropeeOrderModal } from '@/components/business/DropeeOrderModal';
-import { ReviewForm } from '@/components/ReviewForm';
+import { ReviewForm, ReviewData } from '@/components/ReviewForm';
 
 interface Business {
   id: string;
@@ -82,6 +95,7 @@ interface Review {
   id: string;
   rating: number;
   comment: string | null;
+  images: string[] | null;
   created_at: string;
   user_id: string;
   reviewer_name?: string | null;
@@ -98,6 +112,7 @@ export default function BusinessDetail() {
   const [loading, setLoading] = useState(true);
   const [dropeeModalOpen, setDropeeModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -128,7 +143,7 @@ export default function BusinessDetail() {
         // Fetch reviews
         const { data: reviewsData } = await supabase
           .from('reviews')
-          .select('id, rating, comment, created_at, user_id')
+          .select('id, rating, comment, images, created_at, user_id')
           .eq('business_id', data.id)
           .order('created_at', { ascending: false })
           .limit(10);
@@ -510,7 +525,10 @@ export default function BusinessDetail() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-lg">Reviews</CardTitle>
             {user && (
-              <Button variant="outline" size="sm" onClick={() => setReviewModalOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setEditingReview(null);
+                setReviewModalOpen(true);
+              }}>
                 Write a review
               </Button>
             )}
@@ -535,15 +553,79 @@ export default function BusinessDetail() {
                           <p className="font-medium text-foreground">
                             {review.reviewer_name || 'Anonymous'}
                           </p>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-primary text-primary" />
-                            <span className="text-sm font-medium">{review.rating}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-primary text-primary" />
+                              <span className="text-sm font-medium">{review.rating}</span>
+                            </div>
+                            {user?.id === review.user_id && (
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => {
+                                    setEditingReview(review);
+                                    setReviewModalOpen(true);
+                                  }}
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Review</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this review? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={async () => {
+                                          const { error } = await supabase
+                                            .from('reviews')
+                                            .delete()
+                                            .eq('id', review.id);
+                                          if (error) {
+                                            toast.error('Failed to delete review');
+                                          } else {
+                                            toast.success('Review deleted');
+                                            setReviews(reviews.filter(r => r.id !== review.id));
+                                          }
+                                        }}
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            )}
                           </div>
                         </div>
                         {review.comment && (
                           <p className="text-sm text-muted-foreground mt-1">
                             {review.comment}
                           </p>
+                        )}
+                        {review.images && review.images.length > 0 && (
+                          <div className="flex gap-2 mt-2 flex-wrap">
+                            {review.images.map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={img}
+                                alt={`Review photo ${idx + 1}`}
+                                className="h-16 w-16 object-cover rounded-md border border-border"
+                              />
+                            ))}
+                          </div>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(review.created_at).toLocaleDateString()}
@@ -575,13 +657,17 @@ export default function BusinessDetail() {
       {/* Review Modal */}
       <ReviewForm
         open={reviewModalOpen}
-        onOpenChange={setReviewModalOpen}
+        onOpenChange={(open) => {
+          setReviewModalOpen(open);
+          if (!open) setEditingReview(null);
+        }}
         businessId={business.id}
         itemName={business.name}
+        editReview={editingReview}
         onSuccess={async () => {
           const { data: reviewsData } = await supabase
             .from('reviews')
-            .select('id, rating, comment, created_at, user_id')
+            .select('id, rating, comment, images, created_at, user_id')
             .eq('business_id', business.id)
             .order('created_at', { ascending: false })
             .limit(10);

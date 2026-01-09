@@ -26,8 +26,21 @@ import {
   Utensils,
   User,
   Droplets,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { ReviewForm } from '@/components/ReviewForm';
+import { ReviewForm, ReviewData } from '@/components/ReviewForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Place {
   id: string;
@@ -61,6 +74,7 @@ interface Review {
   id: string;
   rating: number;
   comment: string | null;
+  images: string[] | null;
   created_at: string;
   user_id: string;
   reviewer_name?: string | null;
@@ -81,6 +95,7 @@ export default function PlaceDetail() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | null>(null);
 
   useEffect(() => {
     async function fetchPlace() {
@@ -111,7 +126,7 @@ export default function PlaceDetail() {
         // Fetch reviews for this place
         const { data: reviewsData } = await supabase
           .from('reviews')
-          .select('id, rating, comment, created_at, user_id')
+          .select('id, rating, comment, images, created_at, user_id')
           .eq('place_id', data.id)
           .order('created_at', { ascending: false })
           .limit(10);
@@ -472,7 +487,10 @@ export default function PlaceDetail() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-lg">Reviews</CardTitle>
             {user && (
-              <Button variant="outline" size="sm" onClick={() => setReviewModalOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setEditingReview(null);
+                setReviewModalOpen(true);
+              }}>
                 Write a review
               </Button>
             )}
@@ -489,28 +507,80 @@ export default function PlaceDetail() {
               <div className="space-y-4">
                 {reviews.map((review) => (
                   <div key={review.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback>
                           {review.reviewer_name?.charAt(0)?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-foreground">
-                            {review.reviewer_name || 'Anonymous'}
-                          </span>
-                          <div className="flex items-center">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={cn(
-                                  "h-3 w-3",
-                                  i < review.rating ? "fill-primary text-primary" : "text-muted"
-                                )}
-                              />
-                            ))}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground">
+                              {review.reviewer_name || 'Anonymous'}
+                            </span>
+                            <div className="flex items-center">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={cn(
+                                    "h-3 w-3",
+                                    i < review.rating ? "fill-primary text-primary" : "text-muted"
+                                  )}
+                                />
+                              ))}
+                            </div>
                           </div>
+                          {user?.id === review.user_id && (
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => {
+                                  setEditingReview(review);
+                                  setReviewModalOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Review</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this review? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      onClick={async () => {
+                                        const { error } = await supabase
+                                          .from('reviews')
+                                          .delete()
+                                          .eq('id', review.id);
+                                        if (error) {
+                                          toast.error('Failed to delete review');
+                                        } else {
+                                          toast.success('Review deleted');
+                                          setReviews(reviews.filter(r => r.id !== review.id));
+                                        }
+                                      }}
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {new Date(review.created_at).toLocaleDateString()}
@@ -521,6 +591,18 @@ export default function PlaceDetail() {
                       <p className="mt-2 text-muted-foreground text-sm">
                         {review.comment}
                       </p>
+                    )}
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        {review.images.map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`Review photo ${idx + 1}`}
+                            className="h-16 w-16 object-cover rounded-md border border-border"
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}
@@ -534,13 +616,17 @@ export default function PlaceDetail() {
       {place && (
         <ReviewForm
           open={reviewModalOpen}
-          onOpenChange={setReviewModalOpen}
+          onOpenChange={(open) => {
+            setReviewModalOpen(open);
+            if (!open) setEditingReview(null);
+          }}
           placeId={place.id}
           itemName={place.name}
+          editReview={editingReview}
           onSuccess={async () => {
             const { data: reviewsData } = await supabase
               .from('reviews')
-              .select('id, rating, comment, created_at, user_id')
+              .select('id, rating, comment, images, created_at, user_id')
               .eq('place_id', place.id)
               .order('created_at', { ascending: false })
               .limit(10);
