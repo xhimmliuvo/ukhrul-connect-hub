@@ -12,6 +12,7 @@ import {
   MessageSquare,
   ChevronLeft,
   Menu,
+  Truck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface AdminSidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Truck, label: 'Dropee Services', path: '/admin/services' },
   { icon: Store, label: 'Businesses', path: '/admin/businesses' },
   { icon: MapPin, label: 'Places', path: '/admin/places' },
   { icon: Calendar, label: 'Events', path: '/admin/events' },
