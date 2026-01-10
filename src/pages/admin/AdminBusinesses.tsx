@@ -54,12 +54,18 @@ interface Category {
   name: string;
 }
 
+interface ServiceArea {
+  id: string;
+  name: string;
+}
+
 const emptyBusiness = {
   name: '',
   slug: '',
   short_description: '',
   description: '',
   category_id: '',
+  service_area_id: '',
   business_type: 'product',
   address: '',
   phone: '',
@@ -77,6 +83,7 @@ const emptyBusiness = {
 export default function AdminBusinesses() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [serviceAreas, setServiceAreas] = useState<ServiceArea[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -87,6 +94,7 @@ export default function AdminBusinesses() {
   useEffect(() => {
     fetchBusinesses();
     fetchCategories();
+    fetchServiceAreas();
   }, []);
 
   async function fetchBusinesses() {
@@ -110,6 +118,15 @@ export default function AdminBusinesses() {
       .eq('type', 'business')
       .order('name');
     setCategories(data || []);
+  }
+
+  async function fetchServiceAreas() {
+    const { data } = await supabase
+      .from('service_areas')
+      .select('id, name')
+      .eq('active', true)
+      .order('name');
+    setServiceAreas(data || []);
   }
 
   async function handleSave() {
@@ -203,6 +220,7 @@ export default function AdminBusinesses() {
             short_description: data.short_description || '',
             description: data.description || '',
             category_id: data.category_id || '',
+            service_area_id: data.service_area_id || '',
             business_type: data.business_type || 'product',
             address: data.address || '',
             phone: data.phone || '',
@@ -386,21 +404,40 @@ export default function AdminBusinesses() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="business_type">Business Type</Label>
+                <Label htmlFor="service_area">Service Area *</Label>
                 <Select
-                  value={formData.business_type}
-                  onValueChange={(value) => setFormData({ ...formData, business_type: value })}
+                  value={formData.service_area_id}
+                  onValueChange={(value) => setFormData({ ...formData, service_area_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select service area" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="product">Product</SelectItem>
-                    <SelectItem value="service">Service</SelectItem>
-                    <SelectItem value="agency">Agency</SelectItem>
+                    {serviceAreas.map((area) => (
+                      <SelectItem key={area.id} value={area.id}>
+                        {area.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="business_type">Business Type</Label>
+              <Select
+                value={formData.business_type}
+                onValueChange={(value) => setFormData({ ...formData, business_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="product">Product</SelectItem>
+                  <SelectItem value="service">Service</SelectItem>
+                  <SelectItem value="agency">Agency</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -506,7 +543,7 @@ export default function AdminBusinesses() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving || !formData.name}>
+            <Button onClick={handleSave} disabled={saving || !formData.name || !formData.service_area_id}>
               {saving ? 'Saving...' : 'Save'}
             </Button>
           </DialogFooter>
