@@ -208,6 +208,56 @@ export type Database = {
           },
         ]
       }
+      dropee_services: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string
+          id: string
+          name: string
+          price: string
+          service_area_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string
+          id?: string
+          name: string
+          price: string
+          service_area_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string
+          id?: string
+          name?: string
+          price?: string
+          service_area_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dropee_services_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           active: boolean | null
