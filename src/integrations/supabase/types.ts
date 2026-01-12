@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_availability: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          last_seen_at: string
+          shift_end: string | null
+          shift_start: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_availability_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "delivery_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           active: boolean | null
@@ -157,6 +198,80 @@ export type Database = {
           type?: Database["public"]["Enums"]["category_type"]
         }
         Relationships: []
+      }
+      delivery_agents: {
+        Row: {
+          agent_code: string
+          avatar_url: string | null
+          created_at: string
+          current_lat: number | null
+          current_lng: number | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          is_available: boolean
+          is_verified: boolean
+          phone: string | null
+          rating: number | null
+          service_area_id: string | null
+          total_deliveries: number
+          total_earnings: number
+          updated_at: string
+          user_id: string
+          vehicle_type: string
+        }
+        Insert: {
+          agent_code: string
+          avatar_url?: string | null
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          is_verified?: boolean
+          phone?: string | null
+          rating?: number | null
+          service_area_id?: string | null
+          total_deliveries?: number
+          total_earnings?: number
+          updated_at?: string
+          user_id: string
+          vehicle_type?: string
+        }
+        Update: {
+          agent_code?: string
+          avatar_url?: string | null
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          is_available?: boolean
+          is_verified?: boolean
+          phone?: string | null
+          rating?: number | null
+          service_area_id?: string | null
+          total_deliveries?: number
+          total_earnings?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_agents_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dropee_orders: {
         Row: {
@@ -770,6 +885,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_agent_code: { Args: never; Returns: string }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -783,7 +899,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "business_owner"
+      app_role: "admin" | "moderator" | "user" | "business_owner" | "agent"
       category_type: "business" | "product" | "place" | "event"
     }
     CompositeTypes: {
@@ -912,7 +1028,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "business_owner"],
+      app_role: ["admin", "moderator", "user", "business_owner", "agent"],
       category_type: ["business", "product", "place", "event"],
     },
   },
