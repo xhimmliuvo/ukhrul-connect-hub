@@ -33,6 +33,7 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminServiceAreas from "./pages/admin/AdminServiceAreas";
 import AdminBanners from "./pages/admin/AdminBanners";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAgents from "./pages/admin/AdminAgents";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminReviews from "./pages/admin/AdminReviews";
 
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="/admin/service-areas" element={<AdminServiceAreas />} />
               <Route path="/admin/banners" element={<AdminBanners />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/agents" element={<AdminAgents />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/reviews" element={<AdminReviews />} />
               

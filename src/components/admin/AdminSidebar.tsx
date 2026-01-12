@@ -33,6 +33,7 @@ const menuItems = [
   { icon: Globe, label: 'Service Areas', path: '/admin/service-areas' },
   { icon: Image, label: 'Banners', path: '/admin/banners' },
   { icon: Users, label: 'Users', path: '/admin/users' },
+  { icon: Users, label: 'Agents', path: '/admin/agents' },
   { icon: ShoppingBag, label: 'Orders', path: '/admin/orders' },
   { icon: MessageSquare, label: 'Reviews', path: '/admin/reviews' },
 ];

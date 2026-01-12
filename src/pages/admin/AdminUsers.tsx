@@ -38,7 +38,7 @@ interface UserWithRoles extends Profile {
   roles: AppRole[];
 }
 
-const allRoles: AppRole[] = ['admin', 'moderator', 'user', 'business_owner'];
+const allRoles: AppRole[] = ['admin', 'moderator', 'user', 'business_owner', 'agent'];
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -160,6 +160,7 @@ export default function AdminUsers() {
       moderator: 'default',
       business_owner: 'secondary',
       user: 'outline',
+      agent: 'secondary',
     };
     return variants[role];
   };
@@ -268,6 +269,7 @@ export default function AdminUsers() {
                     {role === 'moderator' && <Shield className="h-4 w-4 text-primary" />}
                     {role === 'business_owner' && <ShieldX className="h-4 w-4 text-muted-foreground" />}
                     {role === 'user' && <User className="h-4 w-4 text-muted-foreground" />}
+                    {role === 'agent' && <Shield className="h-4 w-4 text-primary" />}
                     <span className="capitalize">{role.replace('_', ' ')}</span>
                   </Label>
                 </div>
