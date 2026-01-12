@@ -379,16 +379,16 @@ export default function AdminServices() {
               <div className="space-y-2">
                 <Label htmlFor="service_area">Service Area</Label>
                 <Select
-                  value={formData.service_area_id}
+                  value={formData.service_area_id || "all"}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, service_area_id: value })
+                    setFormData({ ...formData, service_area_id: value === "all" ? "" : value })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All areas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All areas</SelectItem>
+                    <SelectItem value="all">All areas</SelectItem>
                     {serviceAreas.map((area) => (
                       <SelectItem key={area.id} value={area.id}>
                         {area.name}
