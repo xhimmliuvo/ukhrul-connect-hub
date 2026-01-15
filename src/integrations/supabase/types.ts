@@ -55,6 +55,51 @@ export type Database = {
           },
         ]
       }
+      agent_order_responses: {
+        Row: {
+          action: string
+          agent_id: string
+          created_at: string
+          id: string
+          order_id: string
+          proposed_fee: number | null
+          response_message: string | null
+        }
+        Insert: {
+          action: string
+          agent_id: string
+          created_at?: string
+          id?: string
+          order_id: string
+          proposed_fee?: number | null
+          response_message?: string | null
+        }
+        Update: {
+          action?: string
+          agent_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string
+          proposed_fee?: number | null
+          response_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_order_responses_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_order_responses_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           active: boolean | null
@@ -275,6 +320,7 @@ export type Database = {
       }
       delivery_orders: {
         Row: {
+          agent_adjusted_fee: number | null
           assigned_agent_id: string | null
           base_fee: number | null
           created_at: string
@@ -288,6 +334,7 @@ export type Database = {
           distance_fee: number | null
           distance_km: number | null
           estimated_delivery_time: string | null
+          fee_adjustment_reason: string | null
           fragile_fee: number | null
           id: string
           is_fragile: boolean | null
@@ -314,6 +361,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          agent_adjusted_fee?: number | null
           assigned_agent_id?: string | null
           base_fee?: number | null
           created_at?: string
@@ -327,6 +375,7 @@ export type Database = {
           distance_fee?: number | null
           distance_km?: number | null
           estimated_delivery_time?: string | null
+          fee_adjustment_reason?: string | null
           fragile_fee?: number | null
           id?: string
           is_fragile?: boolean | null
@@ -353,6 +402,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          agent_adjusted_fee?: number | null
           assigned_agent_id?: string | null
           base_fee?: number | null
           created_at?: string
@@ -366,6 +416,7 @@ export type Database = {
           distance_fee?: number | null
           distance_km?: number | null
           estimated_delivery_time?: string | null
+          fee_adjustment_reason?: string | null
           fragile_fee?: number | null
           id?: string
           is_fragile?: boolean | null
