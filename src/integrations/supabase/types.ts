@@ -273,6 +273,201 @@ export type Database = {
           },
         ]
       }
+      delivery_orders: {
+        Row: {
+          assigned_agent_id: string | null
+          base_fee: number | null
+          created_at: string
+          delivery_address: string
+          delivery_contact_name: string
+          delivery_contact_phone: string
+          delivery_lat: number | null
+          delivery_lng: number | null
+          delivery_notes: string | null
+          delivery_time: string | null
+          distance_fee: number | null
+          distance_km: number | null
+          estimated_delivery_time: string | null
+          fragile_fee: number | null
+          id: string
+          is_fragile: boolean | null
+          package_description: string | null
+          pickup_address: string
+          pickup_contact_name: string
+          pickup_contact_phone: string
+          pickup_lat: number | null
+          pickup_lng: number | null
+          pickup_time: string | null
+          preferred_agent_id: string | null
+          proof_of_delivery_images: string[] | null
+          scheduled_pickup_time: string | null
+          service_id: string | null
+          status: string
+          total_fee: number | null
+          updated_at: string
+          urgency: string | null
+          urgency_fee: number | null
+          user_id: string | null
+          weather_condition: string | null
+          weather_fee: number | null
+          weight_fee: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          base_fee?: number | null
+          created_at?: string
+          delivery_address: string
+          delivery_contact_name: string
+          delivery_contact_phone: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          delivery_notes?: string | null
+          delivery_time?: string | null
+          distance_fee?: number | null
+          distance_km?: number | null
+          estimated_delivery_time?: string | null
+          fragile_fee?: number | null
+          id?: string
+          is_fragile?: boolean | null
+          package_description?: string | null
+          pickup_address: string
+          pickup_contact_name: string
+          pickup_contact_phone: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          pickup_time?: string | null
+          preferred_agent_id?: string | null
+          proof_of_delivery_images?: string[] | null
+          scheduled_pickup_time?: string | null
+          service_id?: string | null
+          status?: string
+          total_fee?: number | null
+          updated_at?: string
+          urgency?: string | null
+          urgency_fee?: number | null
+          user_id?: string | null
+          weather_condition?: string | null
+          weather_fee?: number | null
+          weight_fee?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          base_fee?: number | null
+          created_at?: string
+          delivery_address?: string
+          delivery_contact_name?: string
+          delivery_contact_phone?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          delivery_notes?: string | null
+          delivery_time?: string | null
+          distance_fee?: number | null
+          distance_km?: number | null
+          estimated_delivery_time?: string | null
+          fragile_fee?: number | null
+          id?: string
+          is_fragile?: boolean | null
+          package_description?: string | null
+          pickup_address?: string
+          pickup_contact_name?: string
+          pickup_contact_phone?: string
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          pickup_time?: string | null
+          preferred_agent_id?: string | null
+          proof_of_delivery_images?: string[] | null
+          scheduled_pickup_time?: string | null
+          service_id?: string | null
+          status?: string
+          total_fee?: number | null
+          updated_at?: string
+          urgency?: string | null
+          urgency_fee?: number | null
+          user_id?: string | null
+          weather_condition?: string | null
+          weather_fee?: number | null
+          weight_fee?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_preferred_agent_id_fkey"
+            columns: ["preferred_agent_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "dropee_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_pricing: {
+        Row: {
+          base_price: number
+          created_at: string
+          fragile_multiplier: number
+          id: string
+          max_fee: number
+          min_fee: number
+          price_per_kg: number
+          price_per_km: number
+          rain_multiplier: number
+          service_id: string | null
+          updated_at: string
+          urgent_multiplier: number
+        }
+        Insert: {
+          base_price?: number
+          created_at?: string
+          fragile_multiplier?: number
+          id?: string
+          max_fee?: number
+          min_fee?: number
+          price_per_kg?: number
+          price_per_km?: number
+          rain_multiplier?: number
+          service_id?: string | null
+          updated_at?: string
+          urgent_multiplier?: number
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          fragile_multiplier?: number
+          id?: string
+          max_fee?: number
+          min_fee?: number
+          price_per_kg?: number
+          price_per_km?: number
+          rain_multiplier?: number
+          service_id?: string | null
+          updated_at?: string
+          urgent_multiplier?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_pricing_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "dropee_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dropee_orders: {
         Row: {
           business_id: string
