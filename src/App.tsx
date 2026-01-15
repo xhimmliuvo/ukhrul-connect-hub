@@ -37,6 +37,13 @@ import AdminAgents from "./pages/admin/AdminAgents";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminReviews from "./pages/admin/AdminReviews";
 
+// Agent pages
+import AgentDashboard from "./pages/agent/AgentDashboard";
+import AgentOrders from "./pages/agent/AgentOrders";
+import AgentActiveDelivery from "./pages/agent/AgentActiveDelivery";
+import AgentCompleteDelivery from "./pages/agent/AgentCompleteDelivery";
+import AgentEarnings from "./pages/agent/AgentEarnings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -78,6 +85,13 @@ const App = () => (
               <Route path="/admin/agents" element={<AdminAgents />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/reviews" element={<AdminReviews />} />
+              
+              {/* Agent routes */}
+              <Route path="/agent" element={<AgentDashboard />} />
+              <Route path="/agent/orders" element={<AgentOrders />} />
+              <Route path="/agent/active" element={<AgentActiveDelivery />} />
+              <Route path="/agent/complete/:orderId" element={<AgentCompleteDelivery />} />
+              <Route path="/agent/earnings" element={<AgentEarnings />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
