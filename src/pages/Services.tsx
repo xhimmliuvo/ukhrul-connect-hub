@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { AgentCard } from '@/components/AgentCard';
+import { ServiceRequestModal } from '@/components/dropee/ServiceRequestModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,7 +27,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
-import { toast } from 'sonner';
 
 interface DropeeService {
   id: string;
@@ -74,6 +74,11 @@ export default function Services() {
   const [loading, setLoading] = useState(true);
   const [agentsLoading, setAgentsLoading] = useState(true);
   const { currentArea } = useServiceAreaContext();
+  
+  // Modal state
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<DropeeService | undefined>();
+  const [preferredAgentId, setPreferredAgentId] = useState<string | undefined>();
 
   useEffect(() => {
     fetchServices();
@@ -135,9 +140,21 @@ export default function Services() {
   }
 
   function handleRequestAgent(agentId: string) {
-    toast.info('Agent request feature coming soon!', {
-      description: 'This feature will be available in Phase 2.',
-    });
+    setPreferredAgentId(agentId);
+    setSelectedService(undefined);
+    setRequestModalOpen(true);
+  }
+
+  function handleRequestService(service: DropeeService) {
+    setSelectedService(service);
+    setPreferredAgentId(undefined);
+    setRequestModalOpen(true);
+  }
+
+  function handleCloseModal() {
+    setRequestModalOpen(false);
+    setSelectedService(undefined);
+    setPreferredAgentId(undefined);
   }
 
   const onlineAgentsCount = agents.filter(
@@ -228,7 +245,7 @@ export default function Services() {
                         <p className="text-sm text-muted-foreground">{service.description}</p>
                         <p className="text-sm font-medium text-primary mt-1">{service.price}</p>
                       </div>
-                      <Button size="icon" variant="ghost">
+                      <Button size="icon" variant="ghost" onClick={() => handleRequestService(service)}>
                         <ArrowRight className="h-5 w-5" />
                       </Button>
                     </CardContent>
@@ -289,6 +306,13 @@ export default function Services() {
       </main>
 
       <BottomNav />
+
+      <ServiceRequestModal
+        isOpen={requestModalOpen}
+        onClose={handleCloseModal}
+        service={selectedService}
+        preferredAgentId={preferredAgentId}
+      />
     </div>
   );
 }
