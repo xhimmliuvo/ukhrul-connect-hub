@@ -519,6 +519,57 @@ export type Database = {
           },
         ]
       }
+      delivery_tracking: {
+        Row: {
+          agent_id: string
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          order_id: string
+          speed: number | null
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          agent_id: string
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          order_id: string
+          speed?: number | null
+          status?: string
+          timestamp?: string
+        }
+        Update: {
+          agent_id?: string
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          order_id?: string
+          speed?: number | null
+          status?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tracking_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_tracking_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dropee_orders: {
         Row: {
           business_id: string
