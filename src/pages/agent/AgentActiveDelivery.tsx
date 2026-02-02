@@ -13,11 +13,13 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle,
-  Truck
+  Truck,
+  Radio
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useAgentLocation } from '@/hooks/useAgentLocation';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -47,6 +49,16 @@ export default function AgentActiveDelivery() {
   const { isAgent, loading: rolesLoading } = useUserRoles();
   const [activeOrder, setActiveOrder] = useState<ActiveOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [agentId, setAgentId] = useState<string | null>(null);
+
+  // Location broadcasting - only when in_transit
+  const isInTransit = activeOrder?.status === 'in_transit';
+  const { isTracking, location, error: locationError, permissionStatus } = useAgentLocation({
+    orderId: activeOrder?.id || '',
+    agentId: agentId || '',
+    isActive: isInTransit && !!agentId && !!activeOrder,
+    trackingStatus: 'en_route_delivery',
+  });
 
   useEffect(() => {
     if (!rolesLoading && !isAgent) {
@@ -70,8 +82,11 @@ export default function AgentActiveDelivery() {
 
     if (!agentData) {
       setLoading(false);
+      setAgentId(null);
       return;
     }
+    
+    setAgentId(agentData.id);
 
     // Fetch active order
     const { data, error } = await supabase
@@ -214,6 +229,40 @@ export default function AgentActiveDelivery() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Location Tracking Indicator (when in_transit) */}
+        {isInTransit && (
+          <Card className={isTracking ? 'border-green-200 bg-green-50' : 'border-yellow-200 bg-yellow-50'}>
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Radio className={`h-4 w-4 ${isTracking ? 'text-green-600' : 'text-yellow-600'}`} />
+                    {isTracking && (
+                      <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-green-500 animate-ping" />
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${isTracking ? 'text-green-700' : 'text-yellow-700'}`}>
+                    {isTracking ? 'Location sharing active' : 'Location sharing paused'}
+                  </span>
+                </div>
+                {location && (
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round(location.speed)} km/h
+                  </span>
+                )}
+              </div>
+              {locationError && (
+                <p className="text-xs text-destructive mt-1">{locationError}</p>
+              )}
+              {permissionStatus === 'denied' && (
+                <p className="text-xs text-destructive mt-1">
+                  Please enable location permissions in your browser settings
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Order Details */}
         <Card>
