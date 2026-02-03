@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,8 @@ import {
   LogOut,
   ChevronRight,
   Flame,
-  Loader2
+  Loader2,
+  Truck
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -30,6 +32,7 @@ const menuItems = [
 export default function Profile() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
+  const { isAgent } = useUserRoles();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -86,6 +89,26 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Agent Panel Card - Only show for agents */}
+        {isAgent && (
+          <Link to="/agent">
+            <Card className="bg-primary/5 border-primary/20 hover:bg-primary/10 transition-colors">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Truck className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Agent Dashboard</p>
+                    <p className="text-sm text-muted-foreground">Manage deliveries & earnings</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-primary" />
+              </CardContent>
+            </Card>
+          </Link>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4">
