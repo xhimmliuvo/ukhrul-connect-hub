@@ -1,45 +1,61 @@
 
 
-# Add Agent Panel Access for Agents
+# Add Promo/Coupon Field and Fee Estimation Message
 
 ## Overview
-Create a similar access pathway for agents as admins have. When a user has the 'agent' role, they will see an "Agent Panel" link in both the HamburgerMenu and the Profile page, allowing them to access their agent dashboard at `/agent`.
+Update the order confirmation step in ServiceRequestModal to add an optional promo/coupon code field and communicate that the displayed fee is an estimate - the final fee will be provided by admin/agent upon completion.
 
 ---
 
-## Current State
+## Changes Required
 
-**Admin Access (existing pattern to follow):**
-- HamburgerMenu shows "Admin Panel" link when `isAdmin` is true
-- Uses Shield icon with ChevronRight
-- Links to `/admin`
+### 1. Database Migration
+Add a `promo_code` column to the `delivery_orders` table to store any coupon/promo code the customer provides.
 
-**Agent Pages (already exist):**
-- `/agent` - Agent Dashboard
-- `/agent/orders` - Order Management  
-- `/agent/active` - Active Delivery
-- `/agent/earnings` - Earnings
-
-**Missing:**
-- No visible entry point for agents to access their panel from the main app
+| Column | Type | Description |
+|--------|------|-------------|
+| promo_code | text (nullable) | Optional promo/coupon code entered by customer |
 
 ---
 
-## Solution
+### 2. Update ServiceRequestModal (Confirm Step)
 
-### 1. Update HamburgerMenu
-Add an "Agent Panel" section similar to Admin Panel:
-- Show when `isAgent` is true (already available from `useUserRoles`)
-- Use Truck icon (consistent with agent/delivery theme)
-- Link to `/agent`
-- Place above Admin Panel section
+**Current Flow:**
+- Shows fee breakdown with calculated total
+- Displays "* Final fee may vary based on actual distance and conditions"
+- Place Order button requires `pricingBreakdown` to be set
 
-### 2. Update Profile Page
-Add an "Agent Panel" card/button for agents:
-- Import `useUserRoles` hook
-- Show a prominent card or menu item when user is an agent
-- Use similar styling to other menu items
-- Link to `/agent`
+**New Flow:**
+- Add optional promo/coupon code input field
+- Change fee display to show as "Estimated Total"
+- Add clear message: "Admin/Agent will confirm your final fee upon completion"
+- Allow order placement without requiring exact fee calculation
+- Store promo code with order
+
+---
+
+### 3. UI Changes on Confirm Step (Step 5)
+
+**Add to Fee Breakdown Card:**
+```
++----------------------------------+
+| Fee Breakdown (Estimate)         |
+|----------------------------------|
+| Base Fee              ₹30        |
+| Distance (3 km)       ₹30        |
+|----------------------------------|
+| Estimated Total       ₹60        |
++----------------------------------+
+
++----------------------------------+
+| 🎟 Promo/Coupon Code (Optional) |
+| [Enter code...                 ] |
++----------------------------------+
+
+⚠ This is an estimate only.
+Admin/Agent will provide your final
+fee total upon completion.
+```
 
 ---
 
@@ -47,70 +63,45 @@ Add an "Agent Panel" card/button for agents:
 
 | File | Changes |
 |------|---------|
-| `src/components/HamburgerMenu.tsx` | Add Agent Panel link for agents |
-| `src/pages/Profile.tsx` | Add Agent Panel card/button for agents |
-
----
-
-## UI Design
-
-### HamburgerMenu (after Menu Items, before Admin Section)
-```
-─────────────────────────────
-  [Truck icon] Agent Panel  >
-─────────────────────────────
-```
-
-### Profile Page (new card after Stats Cards)
-```
-+----------------------------------+
-|  Agent Dashboard                 |
-|  Manage your deliveries          |
-|  [Open Agent Panel]              |
-+----------------------------------+
-```
-
-Or as a menu item in the existing card:
-```
-+----------------------------------+
-|  [Truck] Agent Panel          >  |
-+----------------------------------+
-|  [ShoppingBag] My Orders      >  |
-|  [Heart] Saved Items          >  |
-|  ...                             |
-+----------------------------------+
-```
+| Migration SQL | Add `promo_code` column to `delivery_orders` |
+| `src/components/dropee/ServiceRequestModal.tsx` | Add promo code input, update messaging, adjust validation |
 
 ---
 
 ## Implementation Details
 
-### HamburgerMenu Changes
-- Already imports `useUserRoles` and destructures `isAdmin`
-- Add `isAgent` to the destructuring
-- Add new section between menu items and admin section:
-  - Separator
-  - Link to `/agent` with Truck icon and "Agent Panel" label
-  - Only visible when `user && isAgent`
+### ServiceRequestModal Changes
 
-### Profile Page Changes
-- Import `useUserRoles` hook
-- Add `isAgent` check
-- Add prominent card with:
-  - Truck icon
-  - "Agent Dashboard" title
-  - "Manage deliveries, view earnings" description
-  - Link/Button to `/agent`
-  - Styled with primary color to stand out
+1. **Add State Variable:**
+   ```typescript
+   const [promoCode, setPromoCode] = useState('');
+   ```
+
+2. **Update Confirm Step UI (case 5):**
+   - Change "Fee Breakdown" to "Fee Breakdown (Estimate)"
+   - Change "Total" to "Estimated Total"
+   - Add promo/coupon input field with Ticket icon
+   - Replace disclaimer text with:
+     - "This is an estimate only."
+     - "Admin/Agent will confirm your final fee upon completion."
+   - Style the notice prominently (warning/info style)
+
+3. **Update `handleSubmit` Function:**
+   - Include `promo_code: promoCode || null` in the insert
+
+4. **Update `canProceed` Validation:**
+   - Make fee calculation optional for placing order (allow if pricingBreakdown is null)
+   - Users should be able to place orders even if fee calculation failed
 
 ---
 
 ## Expected Result
 
 After implementation:
-1. **Shimray** (agent) logs in
-2. Goes to `/profile` or opens hamburger menu
-3. Sees "Agent Panel" option prominently displayed
-4. Clicks it → Redirects to `/agent` (Agent Dashboard)
-5. Can manage orders, track deliveries, view earnings
+1. User reaches Confirm step
+2. Sees fee breakdown labeled as "Estimate"
+3. Can optionally enter a promo/coupon code
+4. Sees clear message that final fee will be given by admin/agent
+5. Can place order knowing fee is an estimate
+6. Promo code is saved with the order for admin/agent to apply
 
