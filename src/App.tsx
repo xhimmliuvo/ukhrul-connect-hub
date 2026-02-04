@@ -36,6 +36,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAgents from "./pages/admin/AdminAgents";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminReviews from "./pages/admin/AdminReviews";
+import AdminPromoCodes from "./pages/admin/AdminPromoCodes";
 
 // Agent pages
 import AgentDashboard from "./pages/agent/AgentDashboard";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/admin/agents" element={<AdminAgents />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/reviews" element={<AdminReviews />} />
+              <Route path="/admin/promo-codes" element={<AdminPromoCodes />} />
               
               {/* Agent routes */}
               <Route path="/agent" element={<AgentDashboard />} />
