@@ -346,6 +346,7 @@ export type Database = {
           pickup_lng: number | null
           pickup_time: string | null
           preferred_agent_id: string | null
+          promo_code: string | null
           proof_of_delivery_images: string[] | null
           scheduled_pickup_time: string | null
           service_id: string | null
@@ -387,6 +388,7 @@ export type Database = {
           pickup_lng?: number | null
           pickup_time?: string | null
           preferred_agent_id?: string | null
+          promo_code?: string | null
           proof_of_delivery_images?: string[] | null
           scheduled_pickup_time?: string | null
           service_id?: string | null
@@ -428,6 +430,7 @@ export type Database = {
           pickup_lng?: number | null
           pickup_time?: string | null
           preferred_agent_id?: string | null
+          promo_code?: string | null
           proof_of_delivery_images?: string[] | null
           scheduled_pickup_time?: string | null
           service_id?: string | null
