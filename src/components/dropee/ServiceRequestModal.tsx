@@ -21,8 +21,11 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
-  Calculator
+  Calculator,
+  Ticket,
+  Info
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -105,6 +108,9 @@ export function ServiceRequestModal({
   // Pricing
   const [estimatedDistance, setEstimatedDistance] = useState(3); // Default 3km
   const [pricingBreakdown, setPricingBreakdown] = useState<PricingBreakdown | null>(null);
+  
+  // Promo code
+  const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -207,6 +213,7 @@ export function ServiceRequestModal({
         urgency_fee: pricingBreakdown?.urgency_fee,
         total_fee: pricingBreakdown?.total_fee,
         preferred_agent_id: selectedAgentId || null,
+        promo_code: promoCode || null,
       });
 
       if (error) throw error;
@@ -229,7 +236,7 @@ export function ServiceRequestModal({
       case 2: return deliveryAddress && deliveryContactName && deliveryContactPhone;
       case 3: return weightKg > 0;
       case 4: return true; // Agent selection is optional
-      case 5: return !!pricingBreakdown;
+      case 5: return true; // Allow placing order even without pricing - admin will confirm
       default: return true;
     }
   }
@@ -530,7 +537,7 @@ export function ServiceRequestModal({
             
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-4 space-y-2">
-                <h4 className="font-semibold text-foreground mb-3">Fee Breakdown</h4>
+                <h4 className="font-semibold text-foreground mb-3">Fee Breakdown (Estimate)</h4>
                 {calculatingFee ? (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -546,19 +553,38 @@ export function ServiceRequestModal({
                     ))}
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                      <span>Total</span>
+                      <span>Estimated Total</span>
                       <span className="text-primary">₹{pricingBreakdown.total_fee}</span>
                     </div>
                   </>
                 ) : (
-                  <p className="text-muted-foreground text-sm">Unable to calculate fee</p>
+                  <p className="text-muted-foreground text-sm">Fee will be provided by admin/agent</p>
                 )}
               </CardContent>
             </Card>
 
-            <p className="text-xs text-muted-foreground text-center">
-              * Final fee may vary based on actual distance and conditions
-            </p>
+            {/* Promo/Coupon Code */}
+            <Card>
+              <CardContent className="p-4 space-y-2">
+                <Label className="flex items-center gap-2 text-sm font-medium">
+                  <Ticket className="h-4 w-4 text-primary" />
+                  Promo/Coupon Code (Optional)
+                </Label>
+                <Input
+                  placeholder="Enter promo code..."
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Fee Notice */}
+            <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-amber-800 dark:text-amber-300 text-sm">
+                This is an estimate only. Admin/Agent will confirm your final fee upon completion.
+              </AlertDescription>
+            </Alert>
           </div>
         );
 
@@ -620,7 +646,7 @@ export function ServiceRequestModal({
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={loading || !pricingBreakdown}>
+            <Button onClick={handleSubmit} disabled={loading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
