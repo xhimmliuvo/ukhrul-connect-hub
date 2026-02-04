@@ -36,6 +36,7 @@ const menuItems = [
   { icon: Users, label: 'Agents', path: '/admin/agents' },
   { icon: ShoppingBag, label: 'Orders', path: '/admin/orders' },
   { icon: MessageSquare, label: 'Reviews', path: '/admin/reviews' },
+  { icon: Tag, label: 'Promo Codes', path: '/admin/promo-codes' },
 ];
 
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
