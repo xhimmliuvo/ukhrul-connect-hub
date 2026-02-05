@@ -100,6 +100,62 @@ export type Database = {
           },
         ]
       }
+      business_offers: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          id: string
+          image: string | null
+          is_active: boolean
+          offer_type: string
+          title: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          offer_type?: string
+          title: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          offer_type?: string
+          title?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_offers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           active: boolean | null
