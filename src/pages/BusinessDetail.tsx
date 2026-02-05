@@ -101,6 +101,17 @@ interface Review {
   reviewer_name?: string | null;
 }
 
+interface BusinessOffer {
+  id: string;
+  title: string;
+  description: string | null;
+  offer_type: string;
+  discount_percentage: number | null;
+  discount_amount: number | null;
+  image: string | null;
+  valid_until: string | null;
+}
+
 export default function BusinessDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
@@ -109,6 +120,7 @@ export default function BusinessDetail() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
+  const [offers, setOffers] = useState<BusinessOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [dropeeModalOpen, setDropeeModalOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -186,6 +198,18 @@ export default function BusinessDetail() {
 
           setPackages(packagesData || []);
         }
+
+        // Fetch active offers
+        const { data: offersData } = await supabase
+          .from('business_offers')
+          .select('id, title, description, offer_type, discount_percentage, discount_amount, image, valid_until')
+          .eq('business_id', data.id)
+          .eq('is_active', true)
+          .or('valid_until.is.null,valid_until.gte.' + new Date().toISOString())
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        setOffers(offersData || []);
       }
       
       setLoading(false);
@@ -468,6 +492,59 @@ export default function BusinessDetail() {
               <p className="text-muted-foreground whitespace-pre-line">
                 {business.description}
               </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Active Offers */}
+        {offers.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">🎉 Special Offers</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {offers.map((offer) => (
+                  <div 
+                    key={offer.id}
+                    className="p-4 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="flex items-start gap-4">
+                      {offer.image && (
+                        <img 
+                          src={offer.image} 
+                          alt={offer.title}
+                          className="h-16 w-16 object-cover rounded-lg shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold text-foreground">{offer.title}</h4>
+                          <Badge variant="secondary" className="text-xs capitalize">
+                            {offer.offer_type}
+                          </Badge>
+                        </div>
+                        {offer.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{offer.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 mt-2">
+                          <Badge className="bg-primary text-primary-foreground">
+                            {offer.discount_percentage 
+                              ? `${offer.discount_percentage}% OFF`
+                              : `₹${offer.discount_amount} OFF`
+                            }
+                          </Badge>
+                          {offer.valid_until && (
+                            <span className="text-xs text-muted-foreground">
+                              Valid until {new Date(offer.valid_until).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Store,
@@ -13,6 +13,9 @@ import {
   ChevronLeft,
   Menu,
   Truck,
+  Package,
+  Percent,
+  Home,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -26,7 +29,10 @@ interface AdminSidebarProps {
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
   { icon: Truck, label: 'Dropee Services', path: '/admin/services' },
+  { icon: ShoppingBag, label: 'Delivery Orders', path: '/admin/delivery-orders' },
   { icon: Store, label: 'Businesses', path: '/admin/businesses' },
+  { icon: Package, label: 'Products', path: '/admin/products' },
+  { icon: Percent, label: 'Offers', path: '/admin/offers' },
   { icon: MapPin, label: 'Places', path: '/admin/places' },
   { icon: Calendar, label: 'Events', path: '/admin/events' },
   { icon: Tag, label: 'Categories', path: '/admin/categories' },
@@ -34,13 +40,14 @@ const menuItems = [
   { icon: Image, label: 'Banners', path: '/admin/banners' },
   { icon: Users, label: 'Users', path: '/admin/users' },
   { icon: Users, label: 'Agents', path: '/admin/agents' },
-  { icon: ShoppingBag, label: 'Orders', path: '/admin/orders' },
+  { icon: ShoppingBag, label: 'Commerce Orders', path: '/admin/orders' },
   { icon: MessageSquare, label: 'Reviews', path: '/admin/reviews' },
   { icon: Tag, label: 'Promo Codes', path: '/admin/promo-codes' },
 ];
 
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <aside
@@ -65,7 +72,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
         </Button>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-4rem)]">
+      <ScrollArea className="h-[calc(100vh-8rem)]">
         <nav className="space-y-1 p-2">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path || 
@@ -90,6 +97,21 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
           })}
         </nav>
       </ScrollArea>
+
+      {/* Back to Site Button */}
+      <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-sidebar-border">
+        <Button
+          variant="ghost"
+          className={cn(
+            'w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent',
+            collapsed && 'justify-center px-2'
+          )}
+          onClick={() => navigate('/')}
+        >
+          <Home className="h-5 w-5 shrink-0" />
+          {!collapsed && <span className="ml-3">Back to Site</span>}
+        </Button>
+      </div>
     </aside>
   );
 }
