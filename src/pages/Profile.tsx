@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -21,6 +21,7 @@ import {
   Truck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const menuItems = [
   { icon: ShoppingBag, label: 'My Orders', path: '/orders' },
@@ -33,6 +34,70 @@ export default function Profile() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const { isAgent } = useUserRoles();
+  const [streak, setStreak] = useState(0);
+  const [points, setPoints] = useState(0);
+
+  // Fetch and update streak/points on profile visit
+  useEffect(() => {
+    async function updateVisitStats() {
+      if (!user) return;
+
+      // Fetch current profile data
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('visit_streak, points, last_visit_date')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const lastVisit = profile?.last_visit_date;
+      let newStreak = profile?.visit_streak || 0;
+      let newPoints = profile?.points || 0;
+
+      // Check if this is a new day visit
+      if (lastVisit !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        if (lastVisit === yesterdayStr) {
+          // Consecutive day - increment streak
+          newStreak += 1;
+        } else if (!lastVisit) {
+          // First visit ever
+          newStreak = 1;
+        } else {
+          // Streak broken - reset to 1
+          newStreak = 1;
+        }
+
+        // Add points for daily visit
+        newPoints += 10;
+
+        // Update the database
+        await supabase
+          .from('profiles')
+          .update({
+            visit_streak: newStreak,
+            points: newPoints,
+            last_visit_date: today,
+          })
+          .eq('id', user.id);
+      }
+
+      setStreak(newStreak);
+      setPoints(newPoints);
+    }
+
+    if (!loading && user) {
+      updateVisitStats();
+    }
+  }, [user, loading]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -118,7 +183,7 @@ export default function Profile() {
                 <Flame className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">{streak}</p>
                 <p className="text-xs text-muted-foreground">Day Streak</p>
               </div>
             </CardContent>
@@ -129,7 +194,7 @@ export default function Profile() {
                 <Star className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">{points}</p>
                 <p className="text-xs text-muted-foreground">Points</p>
               </div>
             </CardContent>
