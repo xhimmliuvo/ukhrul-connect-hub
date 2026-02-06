@@ -47,6 +47,7 @@ import AgentOrders from "./pages/agent/AgentOrders";
 import AgentActiveDelivery from "./pages/agent/AgentActiveDelivery";
 import AgentCompleteDelivery from "./pages/agent/AgentCompleteDelivery";
 import AgentEarnings from "./pages/agent/AgentEarnings";
+import AgentProfile from "./pages/agent/AgentProfile";
 import TrackOrder from "./pages/TrackOrder";
 
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ const App = () => (
               <Route path="/agent/orders" element={<AgentOrders />} />
               <Route path="/agent/active" element={<AgentActiveDelivery />} />
               <Route path="/agent/complete/:orderId" element={<AgentCompleteDelivery />} />
+              <Route path="/agent/profile" element={<AgentProfile />} />
               <Route path="/agent/earnings" element={<AgentEarnings />} />
               
               {/* Tracking route */}
