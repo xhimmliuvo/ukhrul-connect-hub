@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminDataTable, Column } from '@/components/admin/AdminDataTable';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -490,11 +491,11 @@ export default function AdminBusinesses() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cover_image">Cover Image URL</Label>
-              <Input
-                id="cover_image"
+              <Label>Cover Image</Label>
+              <ImageUpload
                 value={formData.cover_image}
-                onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
+                onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                folder="businesses"
               />
             </div>
 
