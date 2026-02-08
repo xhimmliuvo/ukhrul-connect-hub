@@ -16,7 +16,8 @@ import {
   Bell,
   User,
   Settings,
-  LogOut
+  LogOut,
+  Home
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -187,14 +188,25 @@ export default function AgentDashboard() {
               </Badge>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-primary-foreground"
-            onClick={() => signOut()}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-primary-foreground"
+              onClick={() => navigate('/')}
+              title="Back to Site"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-primary-foreground"
+              onClick={() => signOut()}
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Online Toggle */}
