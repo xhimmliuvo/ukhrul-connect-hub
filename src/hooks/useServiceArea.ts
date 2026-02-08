@@ -49,6 +49,7 @@ export function useServiceArea() {
 
       if (error) {
         console.error('Error fetching service areas:', error);
+        setLoading(false);
         return;
       }
 
