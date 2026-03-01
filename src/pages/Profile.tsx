@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -36,11 +36,13 @@ export default function Profile() {
   const { isAgent } = useUserRoles();
   const [streak, setStreak] = useState(0);
   const [points, setPoints] = useState(0);
+  const streakUpdated = useRef(false);
 
   // Fetch and update streak/points on profile visit
   useEffect(() => {
     async function updateVisitStats() {
-      if (!user) return;
+      if (!user || streakUpdated.current) return;
+      streakUpdated.current = true;
 
       // Fetch current profile data
       const { data: profile, error } = await supabase

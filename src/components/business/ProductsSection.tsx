@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingBag } from 'lucide-react';
+import { ProductDetailModal } from './ProductDetailModal';
 
 interface Product {
   id: string;
@@ -17,9 +18,15 @@ interface Product {
 interface ProductsSectionProps {
   products: Product[];
   onOrderProduct: (product: Product) => void;
+  businessName?: string;
+  businessPhone?: string | null;
+  businessWhatsapp?: string | null;
 }
 
-export function ProductsSection({ products, onOrderProduct }: ProductsSectionProps) {
+export function ProductsSection({ products, onOrderProduct, businessName = '', businessPhone = null, businessWhatsapp = null }: ProductsSectionProps) {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   if (!products || products.length === 0) {
     return (
       <div className="py-8 text-center text-muted-foreground">
@@ -29,12 +36,21 @@ export function ProductsSection({ products, onOrderProduct }: ProductsSectionPro
     );
   }
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setDetailOpen(true);
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-foreground">Products & Items</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden border-border">
+          <Card
+            key={product.id}
+            className="overflow-hidden border-border cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleProductClick(product)}
+          >
             {product.image && (
               <div className="aspect-square overflow-hidden bg-muted">
                 <img
@@ -78,14 +94,27 @@ export function ProductsSection({ products, onOrderProduct }: ProductsSectionPro
                 size="sm"
                 variant="outline"
                 className="w-full text-xs"
-                onClick={() => onOrderProduct(product)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleProductClick(product);
+                }}
               >
-                Order / Enquire
+                View Details
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <ProductDetailModal
+        product={selectedProduct}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        businessName={businessName}
+        businessPhone={businessPhone}
+        businessWhatsapp={businessWhatsapp}
+        onOrderViaDropee={onOrderProduct}
+      />
     </div>
   );
 }
