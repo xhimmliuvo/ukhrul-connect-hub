@@ -1,121 +1,92 @@
 
 
-# Fix GitHub Pages Deployment for Discover Ukhrul
+# Phased Development Plan
 
-## Problem
-Your Vite React app shows a blank white screen on GitHub Pages because:
-1. No build process is configured - GitHub Pages is serving source files, not built assets
-2. Missing base path configuration for asset loading
-3. No SPA (Single Page Application) routing support
+This is a large request. I'll break it into three clear phases, with **Phase 1 (Current)** being implemented now.
 
 ---
 
-## Solution Overview
+## Phase 1 (Current) - Product Details, Ordering Options, CSS Modernization, Day Streak Fix, Search Enhancement
 
-| Issue | Fix |
-|-------|-----|
-| No build process | Add GitHub Actions workflow to build and deploy |
-| Missing base path | Configure `base` in vite.config.ts |
-| SPA routing fails | Add 404.html redirect for client-side routing |
+### 1. Product Detail Modal with Ordering Options
+**New file: `src/components/business/ProductDetailModal.tsx`**
 
----
+When a product card is clicked, show a modal with:
+- Full product image, name, description, price
+- Two action buttons: **"Direct to Vendor"** (opens WhatsApp/call to the business) and **"Order via Dropee"** (opens existing DropeeOrderModal)
 
-## Files to Create/Modify
+**Modify: `src/components/business/ProductsSection.tsx`**
+- Add click handler on product cards to open the detail modal
+- Pass business contact info (phone/whatsapp) as props for the "Direct to Vendor" option
 
-### 1. Update `vite.config.ts`
-Add the `base` configuration so assets load correctly:
+**Modify: `src/pages/BusinessDetail.tsx`**
+- Pass business phone/whatsapp to ProductsSection
+- Wire up ProductDetailModal with both ordering paths
 
-```typescript
-export default defineConfig(({ mode }) => ({
-  base: '/', // For custom domain
-  // ... rest of config
-}));
-```
+### 2. Booking/Reservation with Direct or Dropee Option
+**Modify: `src/components/business/BookingSection.tsx`**
+- Add two submit buttons: "Book Direct" (contacts vendor via WhatsApp/call with booking details) and "Book via Dropee" (submits through DropeeOrderModal)
+- Pass business contact props through from BusinessDetail
 
-### 2. Create GitHub Actions Workflow
-Create `.github/workflows/deploy.yml` to automatically build and deploy when you push to main:
+### 3. Fix Day Streak Logic
+**Modify: `src/pages/Profile.tsx`**
+- The current streak logic looks correct but runs on every render since it lacks proper guarding. Add a ref guard to prevent double-execution in React strict mode
+- Ensure streak only updates once per session using a `useRef` flag
 
-- Installs Node.js and dependencies
-- Runs `npm run build`
-- Deploys the `dist` folder to GitHub Pages
+### 4. Modern Minimalistic CSS Update
+**Modify: `src/index.css`**
+- Update the color palette to a cleaner, more modern look:
+  - Softer backgrounds, refined card shadows
+  - Primary color shifted to a modern blue-green or clean blue
+  - Better spacing and typography defaults
+  - Subtle border radius increase for a friendlier feel
+- Add smooth transition defaults and modern font stack
 
-### 3. Add SPA Support
-Create `public/404.html` - a redirect page that handles client-side routing. When users navigate to `/profile` or any route, GitHub Pages will serve this file which redirects to the main app with the route preserved.
+**Modify: `src/App.css`**
+- Remove legacy Vite boilerplate styles (the logo spin animation, etc.)
 
-### 4. Update `index.html`
-Add a small script to handle the redirect from 404.html, ensuring routes like `/profile`, `/businesses`, etc. work correctly.
+### 5. Enhanced Search
+**Modify: `src/pages/Search.tsx`**
+- Add product search (search across `products` table too)
+- Add search ranking: exact name matches first, then description matches
+- Add recent searches (stored in localStorage)
+- Add search suggestions/categories as quick filters
 
----
-
-## How It Works
-
-```text
-+------------------+     +------------------+     +------------------+
-|  Push to GitHub  | --> | GitHub Actions   | --> | GitHub Pages     |
-|  (main branch)   |     | builds app       |     | serves /dist     |
-+------------------+     +------------------+     +------------------+
-                                                         |
-                                                         v
-                                               +------------------+
-                                               | Your custom      |
-                                               | domain works!    |
-                                               +------------------+
-```
+**Modify: `src/pages/Index.tsx`**
+- Make the homepage search bar functional (navigate to `/search` with query)
 
 ---
 
-## Technical Details
+## Phase 2 (Future) - New User Roles & Notifications
+- **Tourist Guide / Events Manager roles**: New role types in `app_role` enum, dedicated dashboards
+- **Push notifications**: Service worker registration, notification permission request, backend function for sending via Web Push API
+- **Realtime updates**: Chrome notification API for order status changes using existing Supabase Realtime
 
-### GitHub Actions Workflow Structure
-
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - run: npm run build
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
-
-### SPA Redirect Script (in 404.html)
-
-This script preserves the URL path when redirecting:
-- User visits `discoverukhrul.site/profile`
-- GitHub Pages serves 404.html (because /profile doesn't exist as a file)
-- Script redirects to `/?p=/profile`
-- Main app reads the parameter and navigates to `/profile`
+*Will plan in detail when Phase 1 is complete.*
 
 ---
 
-## After Implementation
+## Phase 3 (Future) - Advanced Admin Controls
+- More granular admin dashboard with analytics charts
+- User management with role assignment UI
+- Content moderation queue
+- Site configuration panel (colors, banners, feature toggles)
 
-1. Push changes to GitHub
-2. Go to your repo Settings > Pages
-3. Ensure source is set to "gh-pages" branch (created by the workflow)
-4. Your site will be live at `discoverukhrul.site`
+*Will plan in detail when Phase 2 is complete.*
 
 ---
 
-## Summary of Changes
+## Files Summary (Phase 1)
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `vite.config.ts` | Modify | Add base path configuration |
-| `.github/workflows/deploy.yml` | Create | Automate build and deploy |
-| `public/404.html` | Create | Handle SPA routing on GitHub Pages |
-| `index.html` | Modify | Add redirect handler script |
+| Action | File | Purpose |
+|--------|------|---------|
+| Create | `src/components/business/ProductDetailModal.tsx` | Product detail view with Direct/Dropee ordering |
+| Modify | `src/components/business/ProductsSection.tsx` | Add click-to-detail on product cards |
+| Modify | `src/components/business/BookingSection.tsx` | Add Direct/Dropee booking options |
+| Modify | `src/pages/BusinessDetail.tsx` | Wire up new modals, pass contact info |
+| Modify | `src/pages/Profile.tsx` | Fix streak double-execution bug |
+| Modify | `src/pages/Search.tsx` | Add product search, ranking, recent searches |
+| Modify | `src/pages/Index.tsx` | Make search bar navigate to /search |
+| Modify | `src/index.css` | Modern minimalistic color palette |
+| Modify | `src/App.css` | Remove legacy Vite styles |
 
