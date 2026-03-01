@@ -298,6 +298,9 @@ export default function BusinessDetail() {
             <ProductsSection 
               products={products} 
               onOrderProduct={handleProductOrder}
+              businessName={business.name}
+              businessPhone={business.phone}
+              businessWhatsapp={business.whatsapp}
             />
           </CardContent>
         </Card>
@@ -312,6 +315,10 @@ export default function BusinessDetail() {
             <BookingSection 
               businessType={businessType as 'cafe' | 'restaurant' | 'hotel'}
               onBookSlot={handleBookSlot}
+              businessName={business.name}
+              businessPhone={business.phone}
+              businessWhatsapp={business.whatsapp}
+              onBookViaDropee={() => setDropeeModalOpen(true)}
             />
           </CardContent>
         </Card>
