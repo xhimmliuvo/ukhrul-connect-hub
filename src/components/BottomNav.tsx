@@ -2,6 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Compass, Mountain, Calendar, Heart, Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HamburgerMenu } from './HamburgerMenu';
+import { NotificationBell } from './NotificationBell';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { path: '/', icon: Compass, label: 'Explore' },
@@ -12,6 +14,7 @@ const navItems = [
 ];
 
 export function BottomNav() {
+  const { user } = useAuth();
   const location = useLocation();
 
   return (
@@ -35,6 +38,11 @@ export function BottomNav() {
             </Link>
           );
         })}
+        {user && (
+          <div className="flex flex-col items-center justify-center h-full px-1">
+            <NotificationBell />
+          </div>
+        )}
         <div className="flex flex-col items-center justify-center h-full px-2">
           <HamburgerMenu />
           <span className="text-xs mt-0.5 font-medium text-muted-foreground">More</span>

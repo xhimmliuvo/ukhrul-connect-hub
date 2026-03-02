@@ -38,7 +38,7 @@ interface UserWithRoles extends Profile {
   roles: AppRole[];
 }
 
-const allRoles: AppRole[] = ['admin', 'moderator', 'user', 'business_owner', 'agent'];
+const allRoles: string[] = ['admin', 'moderator', 'user', 'business_owner', 'agent', 'tourist_guide', 'events_manager'];
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
@@ -261,8 +261,8 @@ export default function AdminUsers() {
                 <div key={role} className="flex items-center gap-3">
                   <Checkbox
                     id={role}
-                    checked={selectedRoles.includes(role)}
-                    onCheckedChange={() => toggleRole(role)}
+                    checked={selectedRoles.includes(role as AppRole)}
+                    onCheckedChange={() => toggleRole(role as AppRole)}
                   />
                   <Label htmlFor={role} className="flex items-center gap-2 cursor-pointer">
                     {role === 'admin' && <ShieldCheck className="h-4 w-4 text-destructive" />}
