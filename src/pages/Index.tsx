@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useRealtimeOrders } from '@/hooks/useRealtimeOrders';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
@@ -79,6 +80,7 @@ interface Event {
 
 export default function Index() {
   const { currentArea, loading: areaLoading, geoStatus, detectLocation } = useServiceAreaContext();
+  useRealtimeOrders();
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);

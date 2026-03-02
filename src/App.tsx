@@ -50,6 +50,10 @@ import AgentEarnings from "./pages/agent/AgentEarnings";
 import AgentProfile from "./pages/agent/AgentProfile";
 import TrackOrder from "./pages/TrackOrder";
 
+// Guide & Events Manager pages
+import GuideDashboard from "./pages/guide/GuideDashboard";
+import EventsManagerDashboard from "./pages/events-manager/EventsManagerDashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -103,6 +107,12 @@ const App = () => (
               <Route path="/agent/complete/:orderId" element={<AgentCompleteDelivery />} />
               <Route path="/agent/profile" element={<AgentProfile />} />
               <Route path="/agent/earnings" element={<AgentEarnings />} />
+              
+              {/* Guide routes */}
+              <Route path="/guide" element={<GuideDashboard />} />
+              
+              {/* Events Manager routes */}
+              <Route path="/events-manager" element={<EventsManagerDashboard />} />
               
               {/* Tracking route */}
               <Route path="/track/:orderId" element={<TrackOrder />} />

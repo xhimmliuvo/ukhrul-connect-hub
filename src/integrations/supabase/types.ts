@@ -822,6 +822,133 @@ export type Database = {
           },
         ]
       }
+      guide_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          is_available: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          phone: string | null
+          rating: number | null
+          service_area_id: string | null
+          specialties: string[] | null
+          total_tours: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name: string
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          rating?: number | null
+          service_area_id?: string | null
+          specialties?: string[] | null
+          total_tours?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          phone?: string | null
+          rating?: number | null
+          service_area_id?: string | null
+          specialties?: string[] | null
+          total_tours?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_profiles_service_area_id_fkey"
+            columns: ["service_area_id"]
+            isOneToOne: false
+            referencedRelation: "service_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      managed_events: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          manager_id: string
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          manager_id: string
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          manager_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managed_events_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          data: Json | null
+          id: string
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       places: {
         Row: {
           active: boolean | null

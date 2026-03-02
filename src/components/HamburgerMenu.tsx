@@ -22,6 +22,8 @@ import {
   LogOut,
   Shield,
   ChevronRight,
+  Map,
+  Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -43,7 +45,7 @@ const menuItems: MenuItem[] = [
 
 export function HamburgerMenu() {
   const { user, signOut } = useAuth();
-  const { isAdmin, isAgent } = useUserRoles();
+  const { isAdmin, isAgent, isTouristGuide, isEventsManager } = useUserRoles();
   const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -124,19 +126,45 @@ export function HamburgerMenu() {
           ))}
         </nav>
 
-        {/* Agent Section - Only show for agents */}
+        {/* Role-specific Sections */}
         {user && isAgent && (
           <>
             <Separator />
             <nav className="py-2">
-              <Link
-                to="/agent"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors"
-              >
+              <Link to="/agent" onClick={() => setOpen(false)} className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors">
                 <div className="flex items-center gap-3">
                   <Truck className="h-5 w-5 text-muted-foreground" />
                   <span className="font-medium text-foreground">Agent Panel</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </nav>
+          </>
+        )}
+
+        {user && isTouristGuide && (
+          <>
+            <Separator />
+            <nav className="py-2">
+              <Link to="/guide" onClick={() => setOpen(false)} className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors">
+                <div className="flex items-center gap-3">
+                  <Map className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Guide Dashboard</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            </nav>
+          </>
+        )}
+
+        {user && isEventsManager && (
+          <>
+            <Separator />
+            <nav className="py-2">
+              <Link to="/events-manager" onClick={() => setOpen(false)} className="flex items-center justify-between px-6 py-3 hover:bg-accent transition-colors">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Events Manager</span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </Link>
