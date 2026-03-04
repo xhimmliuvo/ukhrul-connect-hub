@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ImageUpload } from '@/components/admin/ImageUpload';
 import { toast } from 'sonner';
 
 interface Place {
@@ -422,11 +423,11 @@ export default function AdminPlaces() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cover_image">Cover Image URL</Label>
-              <Input
-                id="cover_image"
+              <Label>Cover Image</Label>
+              <ImageUpload
                 value={formData.cover_image}
-                onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
+                onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                folder="places"
               />
             </div>
 

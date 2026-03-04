@@ -42,10 +42,8 @@ interface Business {
   verified: boolean;
   featured: boolean;
   address: string | null;
-  categories: {
-    name: string;
-    color: string | null;
-  } | null;
+  categories: { name: string; color: string | null } | null;
+  service_areas: { name: string } | null;
 }
 
 interface Place {
@@ -59,10 +57,8 @@ interface Place {
   featured: boolean;
   address: string | null;
   entry_fee: number | null;
-  categories: {
-    name: string;
-    color: string | null;
-  } | null;
+  categories: { name: string; color: string | null } | null;
+  service_areas: { name: string } | null;
 }
 
 interface Event {
@@ -76,6 +72,7 @@ interface Event {
   venue: string | null;
   featured: boolean;
   entry_fee: number | null;
+  service_areas: { name: string } | null;
 }
 
 export default function Index() {
@@ -89,68 +86,59 @@ export default function Index() {
   const [loadingPlaces, setLoadingPlaces] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
-  // Show location selector if no area selected after initial load
   useEffect(() => {
     if (!areaLoading && !currentArea && geoStatus === 'idle') {
       detectLocation();
     }
   }, [areaLoading, currentArea, geoStatus, detectLocation]);
 
-  // Show manual selector if geolocation fails
   useEffect(() => {
     if (geoStatus === 'denied' || geoStatus === 'error') {
       setShowLocationSelector(true);
     }
   }, [geoStatus]);
 
-  // Fetch businesses, places, and events for current area
+  // Fetch all items globally with location info
   useEffect(() => {
     async function fetchData() {
       setLoadingBusinesses(true);
       setLoadingPlaces(true);
       setLoadingEvents(true);
       
-      // Fetch businesses
-      let businessQuery = supabase
+      const businessQuery = supabase
         .from('businesses')
         .select(`
           id, name, slug, short_description, cover_image,
           rating, review_count, verified, featured, address,
-          categories (name, color)
+          categories (name, color),
+          service_areas (name)
         `)
         .eq('active', true)
         .order('featured', { ascending: false })
         .order('rating', { ascending: false })
         .limit(6);
 
-      // Fetch places
-      let placeQuery = supabase
+      const placeQuery = supabase
         .from('places')
         .select(`
           id, name, slug, short_description, cover_image,
           rating, review_count, featured, address, entry_fee,
-          categories (name, color)
+          categories (name, color),
+          service_areas (name)
         `)
         .eq('active', true)
         .order('featured', { ascending: false })
         .order('rating', { ascending: false })
         .limit(4);
 
-      // Fetch upcoming events
       const today = new Date().toISOString().split('T')[0];
-      let eventQuery = supabase
+      const eventQuery = supabase
         .from('events')
-        .select('id, name, slug, short_description, cover_image, event_date, start_time, venue, featured, entry_fee')
+        .select('id, name, slug, short_description, cover_image, event_date, start_time, venue, featured, entry_fee, service_areas (name)')
         .eq('active', true)
         .gte('event_date', today)
         .order('event_date', { ascending: true })
         .limit(3);
-
-      if (currentArea) {
-        businessQuery = businessQuery.eq('service_area_id', currentArea.id);
-        placeQuery = placeQuery.eq('service_area_id', currentArea.id);
-        eventQuery = eventQuery.eq('service_area_id', currentArea.id);
-      }
 
       const [businessRes, placeRes, eventRes] = await Promise.all([
         businessQuery,
@@ -158,16 +146,16 @@ export default function Index() {
         eventQuery
       ]);
 
-      setBusinesses(businessRes.data || []);
-      setPlaces(placeRes.data || []);
-      setEvents(eventRes.data || []);
+      setBusinesses((businessRes.data as any) || []);
+      setPlaces((placeRes.data as any) || []);
+      setEvents((eventRes.data as any) || []);
       setLoadingBusinesses(false);
       setLoadingPlaces(false);
       setLoadingEvents(false);
     }
 
     fetchData();
-  }, [currentArea]);
+  }, []);
 
   if (areaLoading) {
     return (
@@ -182,18 +170,13 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Location Banner */}
       <LocationBanner />
-
-      {/* Location Selector Dialog */}
       <LocationSelector 
         open={showLocationSelector} 
         onOpenChange={setShowLocationSelector} 
       />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-6 space-y-8">
-        {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
             Discover Ukhrul
@@ -203,7 +186,6 @@ export default function Index() {
           </p>
         </div>
 
-        {/* Search Bar */}
         <Link to="/search">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -215,7 +197,6 @@ export default function Index() {
           </div>
         </Link>
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-3">
           {quickActions.map(({ icon: Icon, label, path, color }) => (
             <Link key={path} to={path}>
@@ -231,10 +212,8 @@ export default function Index() {
           ))}
         </div>
 
-        {/* Promotional Banner */}
         <PromotionalBanner page="explore" />
 
-        {/* Current Location Info */}
         {currentArea && (
           <Card className="bg-secondary/50 border-0">
             <CardContent className="p-4 flex items-center gap-3">
@@ -243,10 +222,10 @@ export default function Index() {
               </div>
               <div className="flex-1">
                 <p className="font-medium text-foreground">
-                  Showing results for {currentArea.name}
+                  Your location: {currentArea.name}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {currentArea.radius_km}km service radius
+                  Showing results from all areas
                 </p>
               </div>
               <Button 
@@ -263,7 +242,7 @@ export default function Index() {
         {/* Near You Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">Near You</h2>
+            <h2 className="text-lg font-semibold text-foreground">Businesses</h2>
             <Link to="/businesses">
               <Button variant="link" size="sm" className="text-primary">
                 View all
@@ -285,10 +264,7 @@ export default function Index() {
             <Card className="border-dashed">
               <CardContent className="p-8 text-center">
                 <Store className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No businesses in this area yet</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Try selecting a different location
-                </p>
+                <p className="text-muted-foreground">No businesses yet</p>
               </CardContent>
             </Card>
           ) : (
@@ -298,6 +274,7 @@ export default function Index() {
                   key={business.id} 
                   business={business} 
                   variant="compact"
+                  locationName={business.service_areas?.name}
                 />
               ))}
             </div>
@@ -310,13 +287,17 @@ export default function Index() {
             <h2 className="text-lg font-semibold text-foreground">Featured</h2>
             <div className="space-y-4">
               {businesses.filter(b => b.featured).slice(0, 2).map((business) => (
-                <BusinessCard key={business.id} business={business} />
+                <BusinessCard 
+                  key={business.id} 
+                  business={business}
+                  locationName={business.service_areas?.name}
+                />
               ))}
             </div>
           </section>
         )}
 
-        {/* Featured Places */}
+        {/* Tourist Places */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">Tourist Places</h2>
@@ -341,16 +322,18 @@ export default function Index() {
             <Card className="border-dashed">
               <CardContent className="p-8 text-center">
                 <Mountain className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No places in this area yet</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Discover waterfalls, peaks, and cultural sites
-                </p>
+                <p className="text-muted-foreground">No places yet</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {places.slice(0, 4).map((place) => (
-                <PlaceCard key={place.id} place={place} variant="compact" />
+                <PlaceCard 
+                  key={place.id} 
+                  place={place} 
+                  variant="compact"
+                  locationName={place.service_areas?.name}
+                />
               ))}
             </div>
           )}
@@ -384,22 +367,22 @@ export default function Index() {
               <CardContent className="p-8 text-center">
                 <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground">No upcoming events</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Check back for festivals and community events
-                </p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard 
+                  key={event.id} 
+                  event={event}
+                  locationName={event.service_areas?.name}
+                />
               ))}
             </div>
           )}
         </section>
       </main>
 
-      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );

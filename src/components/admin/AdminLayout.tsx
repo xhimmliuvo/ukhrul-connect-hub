@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Home, Loader2 } from 'lucide-react';
+import { Home, Loader2, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminSidebar } from './AdminSidebar';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 interface AdminLayoutProps {
@@ -13,36 +15,42 @@ interface AdminLayoutProps {
   description?: string;
 }
 
+type AppRole = 'admin' | 'moderator' | 'user' | 'business_owner' | 'agent' | 'tourist_guide' | 'events_manager';
+
+const ADMIN_ROLES: AppRole[] = ['admin', 'moderator', 'business_owner', 'agent', 'tourist_guide', 'events_manager'];
+
 export function AdminLayout({ children, title, description }: AdminLayoutProps) {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const isMobile = useIsMobile();
+  const [userRoles, setUserRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    async function checkAdminRole() {
+    async function checkRoles() {
       if (!user) {
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: 'admin',
-      });
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error checking admin role:', error);
-        setIsAdmin(false);
+        console.error('Error checking roles:', error);
+        setUserRoles([]);
       } else {
-        setIsAdmin(data === true);
+        setUserRoles((data || []).map(r => r.role as AppRole));
       }
       setLoading(false);
     }
 
     if (!authLoading) {
-      checkAdminRole();
+      checkRoles();
     }
   }, [user, authLoading]);
 
@@ -59,7 +67,9 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
     return null;
   }
 
-  if (!isAdmin) {
+  const hasAccess = userRoles.some(role => ADMIN_ROLES.includes(role));
+
+  if (!hasAccess) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-background p-4">
         <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
@@ -71,17 +81,51 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
     );
   }
 
+  const isAdmin = userRoles.includes('admin');
+
   return (
     <div className="min-h-screen bg-background">
-      <AdminSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      {/* Desktop sidebar */}
+      {!isMobile && (
+        <AdminSidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          userRoles={userRoles}
+        />
+      )}
+
+      {/* Mobile sidebar sheet */}
+      {isMobile && (
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent side="left" className="p-0 w-72">
+            <AdminSidebar
+              collapsed={false}
+              onToggle={() => setMobileOpen(false)}
+              mobile
+              onNavigate={() => setMobileOpen(false)}
+              userRoles={userRoles}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
       
-      <div className={cn('transition-all duration-300', sidebarCollapsed ? 'ml-16' : 'ml-64')}>
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background px-6">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-            {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      <div className={cn(
+        'transition-all duration-300',
+        !isMobile && (sidebarCollapsed ? 'ml-16' : 'ml-64')
+      )}>
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:h-16 md:px-6">
+          <div className="flex items-center gap-3">
+            {isMobile && (
+              <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
+            <div>
+              <h1 className="text-lg font-semibold text-foreground md:text-xl">{title}</h1>
+              {description && <p className="text-xs text-muted-foreground md:text-sm">{description}</p>}
+            </div>
           </div>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="hidden sm:flex">
             <Link to="/">
               <Home className="mr-2 h-4 w-4" />
               Back to Site
@@ -89,7 +133,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
           </Button>
         </header>
 
-        <main className="p-6">{children}</main>
+        <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

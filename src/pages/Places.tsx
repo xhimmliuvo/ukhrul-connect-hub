@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { PlaceCard } from '@/components/PlaceCard';
@@ -24,10 +23,8 @@ interface Place {
   difficulty_level: string | null;
   entry_fee: number | null;
   category_id: string | null;
-  categories: {
-    name: string;
-    color: string | null;
-  } | null;
+  categories: { name: string; color: string | null } | null;
+  service_areas: { name: string } | null;
 }
 
 interface Category {
@@ -38,14 +35,12 @@ interface Category {
 }
 
 export default function Places() {
-  const { currentArea } = useServiceAreaContext();
   const [places, setPlaces] = useState<Place[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories
   useEffect(() => {
     async function fetchCategories() {
       const { data } = await supabase
@@ -53,13 +48,11 @@ export default function Places() {
         .select('id, name, slug, icon')
         .eq('type', 'place')
         .eq('active', true);
-      
       setCategories(data || []);
     }
     fetchCategories();
   }, []);
 
-  // Fetch places
   useEffect(() => {
     async function fetchPlaces() {
       setLoading(true);
@@ -70,15 +63,12 @@ export default function Places() {
           id, name, slug, short_description, cover_image,
           rating, review_count, featured, address, difficulty_level,
           entry_fee, category_id,
-          categories (name, color)
+          categories (name, color),
+          service_areas (name)
         `)
         .eq('active', true)
         .order('featured', { ascending: false })
         .order('rating', { ascending: false });
-
-      if (currentArea) {
-        query = query.eq('service_area_id', currentArea.id);
-      }
 
       if (selectedCategory) {
         query = query.eq('category_id', selectedCategory);
@@ -93,14 +83,14 @@ export default function Places() {
       if (error) {
         console.error('Error fetching places:', error);
       } else {
-        setPlaces(data || []);
+        setPlaces((data as any) || []);
       }
       
       setLoading(false);
     }
 
     fetchPlaces();
-  }, [currentArea, selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery]);
 
   const featuredPlaces = places.filter(p => p.featured);
   const regularPlaces = places.filter(p => !p.featured);
@@ -117,7 +107,6 @@ export default function Places() {
           </Button>
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -128,7 +117,6 @@ export default function Places() {
           />
         </div>
 
-        {/* Category chips */}
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-2">
             <Button
@@ -152,7 +140,6 @@ export default function Places() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
-        {/* Promotional Banner */}
         <PromotionalBanner page="places" />
 
         {loading ? (
@@ -168,27 +155,27 @@ export default function Places() {
         ) : places.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No places found</p>
-            {currentArea && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Try changing your location or search terms
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground mt-1">
+              Try changing your search terms
+            </p>
           </div>
         ) : (
           <>
-            {/* Featured section */}
             {featuredPlaces.length > 0 && (
               <section className="space-y-3">
                 <h2 className="text-lg font-semibold text-foreground">Featured</h2>
                 <div className="grid grid-cols-1 gap-4">
                   {featuredPlaces.map((place) => (
-                    <PlaceCard key={place.id} place={place} />
+                    <PlaceCard 
+                      key={place.id} 
+                      place={place}
+                      locationName={place.service_areas?.name}
+                    />
                   ))}
                 </div>
               </section>
             )}
 
-            {/* All places */}
             <section className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground">
                 {selectedCategory 
@@ -201,6 +188,7 @@ export default function Places() {
                     key={place.id} 
                     place={place} 
                     variant="compact"
+                    locationName={place.service_areas?.name}
                   />
                 ))}
               </div>

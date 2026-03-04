@@ -40,6 +40,7 @@ import AdminPromoCodes from "./pages/admin/AdminPromoCodes";
 import AdminDeliveryOrders from "./pages/admin/AdminDeliveryOrders";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOffers from "./pages/admin/AdminOffers";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 
 // Agent pages
 import AgentDashboard from "./pages/agent/AgentDashboard";
@@ -99,6 +100,7 @@ const App = () => (
               <Route path="/admin/delivery-orders" element={<AdminDeliveryOrders />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/offers" element={<AdminOffers />} />
+              <Route path="/admin/notifications" element={<AdminNotifications />} />
               
               {/* Agent routes */}
               <Route path="/agent" element={<AgentDashboard />} />

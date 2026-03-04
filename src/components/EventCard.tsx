@@ -18,9 +18,10 @@ interface EventCardProps {
     entry_fee: number | null;
   };
   variant?: 'default' | 'compact';
+  locationName?: string;
 }
 
-export function EventCard({ event, variant = 'default' }: EventCardProps) {
+export function EventCard({ event, variant = 'default', locationName }: EventCardProps) {
   const eventDate = new Date(event.event_date);
   const isUpcoming = eventDate >= new Date();
 
@@ -43,6 +44,12 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
             {event.featured && (
               <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground text-xs">
                 Featured
+              </Badge>
+            )}
+            {locationName && (
+              <Badge variant="secondary" className="absolute bottom-2 left-2 text-xs bg-background/80 backdrop-blur-sm">
+                <MapPin className="h-3 w-3 mr-1" />
+                {locationName}
               </Badge>
             )}
           </div>
@@ -80,11 +87,13 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
               <h3 className="font-semibold text-foreground line-clamp-1">
                 {event.name}
               </h3>
-              {event.featured && (
-                <Badge className="bg-accent text-accent-foreground text-xs flex-shrink-0">
-                  Featured
-                </Badge>
-              )}
+              <div className="flex gap-1 flex-shrink-0">
+                {event.featured && (
+                  <Badge className="bg-accent text-accent-foreground text-xs">
+                    Featured
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {event.short_description && (
@@ -105,6 +114,11 @@ export function EventCard({ event, variant = 'default' }: EventCardProps) {
                   <MapPin className="h-3 w-3" />
                   <span className="line-clamp-1">{event.venue}</span>
                 </div>
+              )}
+              {locationName && (
+                <Badge variant="secondary" className="text-xs">
+                  {locationName}
+                </Badge>
               )}
               {event.entry_fee && event.entry_fee > 0 && (
                 <Badge variant="outline" className="text-xs">

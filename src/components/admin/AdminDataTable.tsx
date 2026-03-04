@@ -102,14 +102,14 @@ export function AdminDataTable<T extends { id: string }>({
         </div>
       </div>
 
-      <div className="rounded-lg border border-border">
+      <div className="rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.key}>{column.header}</TableHead>
+                <TableHead key={column.key} className="whitespace-nowrap">{column.header}</TableHead>
               ))}
-              {actions && <TableHead className="w-24">Actions</TableHead>}
+              {actions && <TableHead className="w-24 whitespace-nowrap">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -137,7 +137,13 @@ export function AdminDataTable<T extends { id: string }>({
                   {columns.map((column) => (
                     <TableCell key={column.key}>{column.cell(item)}</TableCell>
                   ))}
-                  {actions && <TableCell>{actions(item)}</TableCell>}
+                  {actions && (
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {actions(item)}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
@@ -145,7 +151,7 @@ export function AdminDataTable<T extends { id: string }>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of{' '}
           {filteredData.length} entries
