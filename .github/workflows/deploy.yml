@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -35,6 +35,12 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Inject build timestamp (bust CDN cache)
+        run: |
+          BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          sed -i "s|</head>|  <meta name=\"build-time\" content=\"$BUILD_TIME\">\n  </head>|" dist/index.html
+          echo "Injected build timestamp: $BUILD_TIME"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
