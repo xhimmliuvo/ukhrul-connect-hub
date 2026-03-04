@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { BusinessCard } from '@/components/BusinessCard';
@@ -22,10 +21,8 @@ interface Business {
   featured: boolean;
   address: string | null;
   category_id: string | null;
-  categories: {
-    name: string;
-    color: string | null;
-  } | null;
+  categories: { name: string; color: string | null } | null;
+  service_areas: { name: string } | null;
 }
 
 interface Category {
@@ -36,14 +33,12 @@ interface Category {
 }
 
 export default function Businesses() {
-  const { currentArea } = useServiceAreaContext();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories
   useEffect(() => {
     async function fetchCategories() {
       const { data } = await supabase
@@ -51,13 +46,11 @@ export default function Businesses() {
         .select('id, name, slug, icon')
         .eq('type', 'business')
         .eq('active', true);
-      
       setCategories(data || []);
     }
     fetchCategories();
   }, []);
 
-  // Fetch businesses
   useEffect(() => {
     async function fetchBusinesses() {
       setLoading(true);
@@ -67,15 +60,12 @@ export default function Businesses() {
         .select(`
           id, name, slug, short_description, cover_image,
           rating, review_count, verified, featured, address, category_id,
-          categories (name, color)
+          categories (name, color),
+          service_areas (name)
         `)
         .eq('active', true)
         .order('featured', { ascending: false })
         .order('rating', { ascending: false });
-
-      if (currentArea) {
-        query = query.eq('service_area_id', currentArea.id);
-      }
 
       if (selectedCategory) {
         query = query.eq('category_id', selectedCategory);
@@ -90,14 +80,14 @@ export default function Businesses() {
       if (error) {
         console.error('Error fetching businesses:', error);
       } else {
-        setBusinesses(data || []);
+        setBusinesses((data as any) || []);
       }
       
       setLoading(false);
     }
 
     fetchBusinesses();
-  }, [currentArea, selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery]);
 
   const featuredBusinesses = businesses.filter(b => b.featured);
   const regularBusinesses = businesses.filter(b => !b.featured);
@@ -114,7 +104,6 @@ export default function Businesses() {
           </Button>
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -125,7 +114,6 @@ export default function Businesses() {
           />
         </div>
 
-        {/* Category chips */}
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-2">
             <Button
@@ -162,27 +150,27 @@ export default function Businesses() {
         ) : businesses.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No businesses found</p>
-            {currentArea && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Try changing your location or search terms
-              </p>
-            )}
+            <p className="text-sm text-muted-foreground mt-1">
+              Try changing your search terms
+            </p>
           </div>
         ) : (
           <>
-            {/* Featured section */}
             {featuredBusinesses.length > 0 && (
               <section className="space-y-3">
                 <h2 className="text-lg font-semibold text-foreground">Featured</h2>
                 <div className="grid grid-cols-1 gap-4">
                   {featuredBusinesses.map((business) => (
-                    <BusinessCard key={business.id} business={business} />
+                    <BusinessCard 
+                      key={business.id} 
+                      business={business}
+                      locationName={business.service_areas?.name}
+                    />
                   ))}
                 </div>
               </section>
             )}
 
-            {/* All businesses */}
             <section className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground">
                 {selectedCategory 
@@ -195,6 +183,7 @@ export default function Businesses() {
                     key={business.id} 
                     business={business} 
                     variant="compact"
+                    locationName={business.service_areas?.name}
                   />
                 ))}
               </div>

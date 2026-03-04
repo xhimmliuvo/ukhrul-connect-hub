@@ -29,9 +29,10 @@ interface Place {
 interface PlaceCardProps {
   place: Place;
   variant?: 'default' | 'compact';
+  locationName?: string;
 }
 
-export function PlaceCard({ place, variant = 'default' }: PlaceCardProps) {
+export function PlaceCard({ place, variant = 'default', locationName }: PlaceCardProps) {
   const { user } = useAuth();
   const { isSaved, toggleSave } = useSavedItems();
   const saved = isSaved('place', place.id);
@@ -100,6 +101,14 @@ export function PlaceCard({ place, variant = 'default' }: PlaceCardProps) {
           {place.featured && (
             <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
               Featured
+            </Badge>
+          )}
+
+          {/* Location badge */}
+          {locationName && (
+            <Badge variant="secondary" className="absolute bottom-2 right-2 text-xs bg-background/80 backdrop-blur-sm">
+              <MapPin className="h-3 w-3 mr-1" />
+              {locationName}
             </Badge>
           )}
 

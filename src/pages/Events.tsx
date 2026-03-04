@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
 import { EventCard } from '@/components/EventCard';
@@ -22,10 +21,10 @@ interface Event {
   venue: string | null;
   featured: boolean;
   entry_fee: number | null;
+  service_areas: { name: string } | null;
 }
 
 export default function Events() {
-  const { currentArea } = useServiceAreaContext();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,28 +33,22 @@ export default function Events() {
     async function fetchEvents() {
       setLoading(true);
       
-      let query = supabase
+      const { data, error } = await supabase
         .from('events')
-        .select('id, name, slug, short_description, cover_image, event_date, start_time, venue, featured, entry_fee')
+        .select('id, name, slug, short_description, cover_image, event_date, start_time, venue, featured, entry_fee, service_areas (name)')
         .eq('active', true)
         .order('event_date', { ascending: true });
-
-      if (currentArea) {
-        query = query.eq('service_area_id', currentArea.id);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching events:', error);
       }
 
-      setEvents(data || []);
+      setEvents((data as any) || []);
       setLoading(false);
     }
 
     fetchEvents();
-  }, [currentArea]);
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
   
@@ -79,7 +72,6 @@ export default function Events() {
       <main className="container mx-auto px-4 py-6 space-y-6">
         <h1 className="text-2xl font-semibold text-foreground">Events</h1>
 
-        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -90,7 +82,6 @@ export default function Events() {
           />
         </div>
 
-        {/* Promotional Banner */}
         <PromotionalBanner page="events" />
 
         {loading ? (
@@ -127,13 +118,17 @@ export default function Events() {
                       No upcoming events
                     </h3>
                     <p className="text-sm text-muted-foreground max-w-xs">
-                      Check back soon for festivals, markets, and community events in your area.
+                      Check back soon for festivals, markets, and community events.
                     </p>
                   </CardContent>
                 </Card>
               ) : (
                 filteredUpcoming.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard 
+                    key={event.id} 
+                    event={event}
+                    locationName={event.service_areas?.name}
+                  />
                 ))
               )}
             </TabsContent>
@@ -155,7 +150,11 @@ export default function Events() {
                 </Card>
               ) : (
                 filteredPast.map((event) => (
-                  <EventCard key={event.id} event={event} />
+                  <EventCard 
+                    key={event.id} 
+                    event={event}
+                    locationName={event.service_areas?.name}
+                  />
                 ))
               )}
             </TabsContent>

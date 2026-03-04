@@ -28,9 +28,10 @@ interface Business {
 interface BusinessCardProps {
   business: Business;
   variant?: 'default' | 'compact';
+  locationName?: string;
 }
 
-export function BusinessCard({ business, variant = 'default' }: BusinessCardProps) {
+export function BusinessCard({ business, variant = 'default', locationName }: BusinessCardProps) {
   const { user } = useAuth();
   const { isSaved, toggleSave } = useSavedItems();
   const saved = isSaved('business', business.id);
@@ -90,6 +91,14 @@ export function BusinessCard({ business, variant = 'default' }: BusinessCardProp
           {business.featured && (
             <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
               Featured
+            </Badge>
+          )}
+
+          {/* Location badge */}
+          {locationName && (
+            <Badge variant="secondary" className="absolute bottom-2 left-2 text-xs bg-background/80 backdrop-blur-sm">
+              <MapPin className="h-3 w-3 mr-1" />
+              {locationName}
             </Badge>
           )}
         </div>
