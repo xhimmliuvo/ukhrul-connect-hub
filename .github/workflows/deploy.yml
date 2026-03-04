@@ -1,22 +1,19 @@
-name: Deploy to GitHub Pages
+name: Build & Deploy to Cloudflare Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: "pages"
+  group: "cloudflare-deploy"
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    name: Build and Deploy
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,27 +33,11 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
-      - name: Inject build timestamp (bust CDN cache)
-        run: |
-          BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          sed -i "s|</head>|  <meta name=\"build-time\" content=\"$BUILD_TIME\">\n  </head>|" dist/index.html
-          echo "Injected build timestamp: $BUILD_TIME"
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          path: './dist'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ukhrul-connect-hub
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
