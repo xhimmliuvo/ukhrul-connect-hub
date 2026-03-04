@@ -1,92 +1,117 @@
 
 
-# Phased Development Plan
+# Phase 3: Admin Enhancements, Mobile Layouts, Location-Aware Content, Notifications, and Delivery API
 
-This is a large request. I'll break it into three clear phases, with **Phase 1 (Current)** being implemented now.
-
----
-
-## Phase 1 (Current) - Product Details, Ordering Options, CSS Modernization, Day Streak Fix, Search Enhancement
-
-### 1. Product Detail Modal with Ordering Options
-**New file: `src/components/business/ProductDetailModal.tsx`**
-
-When a product card is clicked, show a modal with:
-- Full product image, name, description, price
-- Two action buttons: **"Direct to Vendor"** (opens WhatsApp/call to the business) and **"Order via Dropee"** (opens existing DropeeOrderModal)
-
-**Modify: `src/components/business/ProductsSection.tsx`**
-- Add click handler on product cards to open the detail modal
-- Pass business contact info (phone/whatsapp) as props for the "Direct to Vendor" option
-
-**Modify: `src/pages/BusinessDetail.tsx`**
-- Pass business phone/whatsapp to ProductsSection
-- Wire up ProductDetailModal with both ordering paths
-
-### 2. Booking/Reservation with Direct or Dropee Option
-**Modify: `src/components/business/BookingSection.tsx`**
-- Add two submit buttons: "Book Direct" (contacts vendor via WhatsApp/call with booking details) and "Book via Dropee" (submits through DropeeOrderModal)
-- Pass business contact props through from BusinessDetail
-
-### 3. Fix Day Streak Logic
-**Modify: `src/pages/Profile.tsx`**
-- The current streak logic looks correct but runs on every render since it lacks proper guarding. Add a ref guard to prevent double-execution in React strict mode
-- Ensure streak only updates once per session using a `useRef` flag
-
-### 4. Modern Minimalistic CSS Update
-**Modify: `src/index.css`**
-- Update the color palette to a cleaner, more modern look:
-  - Softer backgrounds, refined card shadows
-  - Primary color shifted to a modern blue-green or clean blue
-  - Better spacing and typography defaults
-  - Subtle border radius increase for a friendlier feel
-- Add smooth transition defaults and modern font stack
-
-**Modify: `src/App.css`**
-- Remove legacy Vite boilerplate styles (the logo spin animation, etc.)
-
-### 5. Enhanced Search
-**Modify: `src/pages/Search.tsx`**
-- Add product search (search across `products` table too)
-- Add search ranking: exact name matches first, then description matches
-- Add recent searches (stored in localStorage)
-- Add search suggestions/categories as quick filters
-
-**Modify: `src/pages/Index.tsx`**
-- Make the homepage search bar functional (navigate to `/search` with query)
+This is a large set of changes. I'll break it into **4 sub-phases**, implementing them step by step.
 
 ---
 
-## Phase 2 (Future) - New User Roles & Notifications
-- **Tourist Guide / Events Manager roles**: New role types in `app_role` enum, dedicated dashboards
-- **Push notifications**: Service worker registration, notification permission request, backend function for sending via Web Push API
-- **Realtime updates**: Chrome notification API for order status changes using existing Supabase Realtime
+## Sub-Phase 3A: Admin Role Access + Mobile Responsive Admin Layout
 
-*Will plan in detail when Phase 1 is complete.*
+### 1. Expand Admin Access to All Roles
+**Modify: `src/components/admin/AdminLayout.tsx`**
+- Currently only checks for `admin` role. Update to also allow `moderator`, `business_owner`, `agent`, `tourist_guide`, `events_manager` access
+- Show role-appropriate sidebar items (e.g., business owners only see their businesses, agents see delivery orders)
+
+### 2. Mobile-Responsive Admin Layout
+**Modify: `src/components/admin/AdminLayout.tsx`**
+- On mobile: sidebar becomes a slide-out drawer (using Sheet component) instead of fixed sidebar
+- Remove the fixed `ml-64` margin on mobile, use full-width content
+- Add hamburger menu button in the header for mobile
+
+**Modify: `src/components/admin/AdminSidebar.tsx`**
+- Accept a `mobile` prop to render as overlay/sheet instead of fixed sidebar
+- Close on navigation on mobile
+
+**Modify: `src/components/admin/AdminDataTable.tsx`**
+- Make tables horizontally scrollable on mobile
+- Stack action buttons vertically on small screens
 
 ---
 
-## Phase 3 (Future) - Advanced Admin Controls
-- More granular admin dashboard with analytics charts
-- User management with role assignment UI
-- Content moderation queue
-- Site configuration panel (colors, banners, feature toggles)
+## Sub-Phase 3B: Show All Locations + Location Labels
 
-*Will plan in detail when Phase 2 is complete.*
+### 3. Remove Service Area Filter, Show Location Labels
+**Modify: `src/pages/Index.tsx`, `src/pages/Businesses.tsx`, `src/pages/Places.tsx`, `src/pages/Events.tsx`**
+- Fetch all items regardless of service area (remove the `service_area_id` filter)
+- Join `service_areas` table in queries to get the area name
+- Display a location badge on each card (e.g., "Ukhrul", "Gamgjang")
+- Optionally allow filtering by area as a dropdown filter (not mandatory)
+
+**Modify: `src/components/BusinessCard.tsx`, `src/components/PlaceCard.tsx`, `src/components/EventCard.tsx`**
+- Add `locationName` prop and render a small location badge/tag on each card
 
 ---
 
-## Files Summary (Phase 1)
+## Sub-Phase 3C: Admin Notifications + Image Upload Everywhere
 
-| Action | File | Purpose |
-|--------|------|---------|
-| Create | `src/components/business/ProductDetailModal.tsx` | Product detail view with Direct/Dropee ordering |
-| Modify | `src/components/business/ProductsSection.tsx` | Add click-to-detail on product cards |
-| Modify | `src/components/business/BookingSection.tsx` | Add Direct/Dropee booking options |
-| Modify | `src/pages/BusinessDetail.tsx` | Wire up new modals, pass contact info |
-| Modify | `src/pages/Profile.tsx` | Fix streak double-execution bug |
-| Modify | `src/pages/Search.tsx` | Add product search, ranking, recent searches |
-| Modify | `src/pages/Index.tsx` | Make search bar navigate to /search |
-| Modify | `src/index.css` | Modern minimalistic color palette |
-| Modify | `src/App.css` | Remove legacy Vite styles |
+### 4. Admin Send Notifications to Users
+**Create: `src/pages/admin/AdminNotifications.tsx`**
+- New admin page to compose and send notifications to users
+- Target: all users, specific user, users with specific role
+- Form: title, body, type
+- Inserts into `notifications` table
+
+**Modify: `src/components/admin/AdminSidebar.tsx`**
+- Add "Notifications" menu item pointing to `/admin/notifications`
+
+**Modify: `src/App.tsx`**
+- Add route for `/admin/notifications`
+
+### 5. Replace All Image URL Inputs with ImageUpload Component
+**Modify: `src/pages/admin/AdminEvents.tsx`**
+- Replace cover_image text input with `ImageUpload` component (already exists and is used in AdminBusinesses)
+
+**Modify: `src/pages/admin/AdminPlaces.tsx`**
+- Replace cover_image text input with `ImageUpload` component
+
+**Modify: any other admin pages** still using URL text inputs for images
+
+---
+
+## Sub-Phase 3D: Delivery API (Edge Function)
+
+### 6. Public Delivery API Edge Function
+**Create: `supabase/functions/delivery-api/index.ts`**
+- RESTful API endpoints for external delivery platforms to:
+  - `GET /delivery-api?action=track&order_id=xxx` - Track a delivery order status and location
+  - `POST /delivery-api` with `action=webhook_register` - Register a webhook URL to receive order status notifications
+  - `GET /delivery-api?action=status&order_id=xxx` - Get order status
+
+**Create DB migration:**
+- New `api_webhooks` table to store registered webhook URLs from external platforms
+- Columns: `id`, `url`, `secret`, `events` (array of event types), `active`, `created_at`
+
+**Modify: `supabase/config.toml`**
+- Add `[functions.delivery-api]` with `verify_jwt = false` (public API, uses API key auth)
+
+**Create: `supabase/functions/notify-webhooks/index.ts`**
+- Triggered by database changes (or called from delivery-api)
+- Sends POST requests to registered webhook URLs when order status changes
+
+---
+
+## Visual Improvements
+- All admin form dialogs will use consistent spacing and the ImageUpload component
+- Mobile admin will use bottom sheet modals instead of centered dialogs for better UX
+
+---
+
+## Files Summary
+
+| Sub-Phase | Action | File | Purpose |
+|-----------|--------|------|---------|
+| 3A | Modify | `src/components/admin/AdminLayout.tsx` | Multi-role access + mobile responsive |
+| 3A | Modify | `src/components/admin/AdminSidebar.tsx` | Mobile drawer mode |
+| 3A | Modify | `src/components/admin/AdminDataTable.tsx` | Mobile scrollable tables |
+| 3B | Modify | `src/pages/Index.tsx` | Show all locations with badges |
+| 3B | Modify | `src/pages/Businesses.tsx`, `Places.tsx`, `Events.tsx` | Remove area filter, add location join |
+| 3B | Modify | `src/components/BusinessCard.tsx`, `PlaceCard.tsx`, `EventCard.tsx` | Add location badge |
+| 3C | Create | `src/pages/admin/AdminNotifications.tsx` | Admin send notifications |
+| 3C | Modify | `src/pages/admin/AdminEvents.tsx` | ImageUpload for cover image |
+| 3C | Modify | `src/pages/admin/AdminPlaces.tsx` | ImageUpload for cover image |
+| 3C | Modify | `src/components/admin/AdminSidebar.tsx`, `src/App.tsx` | Add notifications route |
+| 3D | Create | `supabase/functions/delivery-api/index.ts` | Public delivery API |
+| 3D | Create | `supabase/functions/notify-webhooks/index.ts` | Webhook notifications |
+| 3D | Migration | `api_webhooks` table | Store webhook registrations |
 
