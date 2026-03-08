@@ -34,6 +34,8 @@ interface DeliveryOrder {
   distance_km: number;
   weight_kg: number;
   created_at: string;
+  hub_order_id: string | null;
+  hub_status: string | null;
   dropee_services: { name: string } | null;
   delivery_agents: { full_name: string; agent_code: string } | null;
 }
