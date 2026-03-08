@@ -231,9 +231,16 @@ export default function Orders() {
                             #{order.id.slice(0, 8).toUpperCase()}
                           </p>
                         </div>
-                        <Badge variant="outline" className={getStatusColor(order.status)}>
-                          {order.status?.replace(/_/g, ' ') || 'Pending'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={getStatusColor(order.status)}>
+                            {order.status?.replace(/_/g, ' ') || 'Pending'}
+                          </Badge>
+                          {order.hub_order_id && order.hub_status && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              Hub: {order.hub_status.replace(/_/g, ' ')}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 space-y-3">
