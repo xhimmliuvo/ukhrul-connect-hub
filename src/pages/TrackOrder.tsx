@@ -16,6 +16,8 @@ export default function TrackOrder() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { order, agent, latestLocation, loading, error, refetch } = useOrderTracking(orderId || '');
+  const hubOrderId = (order as any)?.hub_order_id || null;
+  const { hubStatus } = useHubTracking(hubOrderId);
 
   if (loading) {
     return (
