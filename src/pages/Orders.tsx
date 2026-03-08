@@ -34,6 +34,8 @@ interface DeliveryOrder {
   distance_km: number;
   weight_kg: number;
   created_at: string;
+  hub_order_id: string | null;
+  hub_status: string | null;
   dropee_services: { name: string } | null;
   delivery_agents: { full_name: string; agent_code: string } | null;
 }
@@ -115,6 +117,7 @@ export default function Orders() {
       .select(`
         id, pickup_address, delivery_address, status, total_fee,
         agent_adjusted_fee, distance_km, weight_kg, created_at,
+        hub_order_id, hub_status,
         dropee_services (name),
         delivery_agents!delivery_orders_assigned_agent_id_fkey (full_name, agent_code)
       `)
@@ -228,9 +231,16 @@ export default function Orders() {
                             #{order.id.slice(0, 8).toUpperCase()}
                           </p>
                         </div>
-                        <Badge variant="outline" className={getStatusColor(order.status)}>
-                          {order.status?.replace(/_/g, ' ') || 'Pending'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={getStatusColor(order.status)}>
+                            {order.status?.replace(/_/g, ' ') || 'Pending'}
+                          </Badge>
+                          {order.hub_order_id && order.hub_status && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              Hub: {order.hub_status.replace(/_/g, ' ')}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 space-y-3">

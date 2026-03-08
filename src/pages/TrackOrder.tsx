@@ -5,7 +5,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, AlertTriangle, Clock, RefreshCw } from 'lucide-react';
 import { useOrderTracking } from '@/hooks/useOrderTracking';
+import { useHubTracking } from '@/hooks/useHubTracking';
 import { OrderStatusTimeline } from '@/components/tracking/OrderStatusTimeline';
+import { HubStatusTimeline } from '@/components/tracking/HubStatusTimeline';
 import { AgentInfoCard } from '@/components/tracking/AgentInfoCard';
 import { LiveLocationCard } from '@/components/tracking/LiveLocationCard';
 import { format } from 'date-fns';
@@ -14,6 +16,8 @@ export default function TrackOrder() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { order, agent, latestLocation, loading, error, refetch } = useOrderTracking(orderId || '');
+  const hubOrderId = (order as any)?.hub_order_id || null;
+  const { hubStatus } = useHubTracking(hubOrderId);
 
   if (loading) {
     return (
@@ -140,6 +144,15 @@ export default function TrackOrder() {
             />
           </CardContent>
         </Card>
+
+        {/* Hub Status Timeline */}
+        {hubOrderId && (
+          <Card>
+            <CardContent className="p-4">
+              <HubStatusTimeline status={hubStatus || (order as any).hub_status || 'pending'} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Agent Info */}
         {agent && (
