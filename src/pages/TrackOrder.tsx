@@ -145,6 +145,15 @@ export default function TrackOrder() {
           </CardContent>
         </Card>
 
+        {/* Hub Status Timeline */}
+        {hubOrderId && (
+          <Card>
+            <CardContent className="p-4">
+              <HubStatusTimeline status={hubStatus || (order as any).hub_status || 'pending'} />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Agent Info */}
         {agent && (
           <div className="space-y-2">
