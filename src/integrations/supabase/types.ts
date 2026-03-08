@@ -422,6 +422,8 @@ export type Database = {
           estimated_delivery_time: string | null
           fee_adjustment_reason: string | null
           fragile_fee: number | null
+          hub_order_id: string | null
+          hub_status: string | null
           id: string
           is_fragile: boolean | null
           package_description: string | null
@@ -464,6 +466,8 @@ export type Database = {
           estimated_delivery_time?: string | null
           fee_adjustment_reason?: string | null
           fragile_fee?: number | null
+          hub_order_id?: string | null
+          hub_status?: string | null
           id?: string
           is_fragile?: boolean | null
           package_description?: string | null
@@ -506,6 +510,8 @@ export type Database = {
           estimated_delivery_time?: string | null
           fee_adjustment_reason?: string | null
           fragile_fee?: number | null
+          hub_order_id?: string | null
+          hub_status?: string | null
           id?: string
           is_fragile?: boolean | null
           package_description?: string | null
