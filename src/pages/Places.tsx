@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Filter } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 
 interface Place {
   id: string;
@@ -56,7 +56,7 @@ export default function Places() {
   useEffect(() => {
     async function fetchPlaces() {
       setLoading(true);
-      
+
       let query = supabase
         .from('places')
         .select(`
@@ -85,7 +85,7 @@ export default function Places() {
       } else {
         setPlaces((data as any) || []);
       }
-      
+
       setLoading(false);
     }
 
@@ -96,33 +96,40 @@ export default function Places() {
   const regularPlaces = places.filter(p => !p.featured);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       <LocationBanner />
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-foreground">Places to Visit</h1>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Places to Visit</h1>
+          <Button variant="outline" size="icon" className="rounded-xl">
+            <SlidersHorizontal className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search places..."
-            className="pl-10 h-12 bg-secondary border-0"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Sticky glass search */}
+        <div className="sticky top-12 z-40">
+          <div className="glass rounded-2xl p-1">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search places..."
+                className="pl-12 h-12 bg-card border-0 rounded-xl text-base shadow-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
+        {/* Category pills */}
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex gap-2">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(null)}
+              className="rounded-xl font-semibold"
             >
               All
             </Button>
@@ -132,6 +139,7 @@ export default function Places() {
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.id)}
+                className="rounded-xl font-semibold"
               >
                 {category.name}
               </Button>
@@ -145,16 +153,16 @@ export default function Places() {
         {loading ? (
           <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-36 w-full rounded-lg" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
+              <div key={i} className="space-y-3">
+                <Skeleton className="h-36 w-full rounded-2xl" />
+                <Skeleton className="h-4 w-3/4 rounded-lg" />
+                <Skeleton className="h-3 w-1/2 rounded-lg" />
               </div>
             ))}
           </div>
         ) : places.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No places found</p>
+          <div className="text-center py-16">
+            <p className="text-muted-foreground font-medium">No places found</p>
             <p className="text-sm text-muted-foreground mt-1">
               Try changing your search terms
             </p>
@@ -162,31 +170,32 @@ export default function Places() {
         ) : (
           <>
             {featuredPlaces.length > 0 && (
-              <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-foreground">Featured</h2>
-                <div className="grid grid-cols-1 gap-4">
+              <section className="space-y-4">
+                <h2 className="text-lg font-bold text-foreground">Featured</h2>
+                <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
                   {featuredPlaces.map((place) => (
-                    <PlaceCard 
-                      key={place.id} 
-                      place={place}
-                      locationName={place.service_areas?.name}
-                    />
+                    <div key={place.id} className="min-w-[280px] max-w-[320px] flex-shrink-0">
+                      <PlaceCard
+                        place={place}
+                        locationName={place.service_areas?.name}
+                      />
+                    </div>
                   ))}
                 </div>
               </section>
             )}
 
-            <section className="space-y-3">
-              <h2 className="text-lg font-semibold text-foreground">
-                {selectedCategory 
-                  ? categories.find(c => c.id === selectedCategory)?.name 
+            <section className="space-y-4">
+              <h2 className="text-lg font-bold text-foreground">
+                {selectedCategory
+                  ? categories.find(c => c.id === selectedCategory)?.name
                   : 'All Places'}
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 {regularPlaces.map((place) => (
-                  <PlaceCard 
-                    key={place.id} 
-                    place={place} 
+                  <PlaceCard
+                    key={place.id}
+                    place={place}
                     variant="compact"
                     locationName={place.service_areas?.name}
                   />
