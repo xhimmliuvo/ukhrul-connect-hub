@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, MapPin, ArrowLeft } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, Sparkles } from 'lucide-react';
 
 const signInSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -45,34 +45,22 @@ export default function Auth() {
 
   const signInForm = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
   const signUpForm = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
   });
 
   const forgotPasswordForm = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: { email: '' },
   });
 
-  // Redirect if already authenticated
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       if (user && !authLoading) {
-        // Check if user has admin role
         const { data: roles } = await supabase.rpc('get_user_roles', { _user_id: user.id });
         if (roles && roles.includes('admin')) {
           navigate('/admin');
@@ -88,52 +76,34 @@ export default function Auth() {
     setIsSubmitting(true);
     const { error } = await signIn(data.email, data.password);
     setIsSubmitting(false);
-
     if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        toast.error('Invalid email or password');
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message.includes('Invalid login credentials') ? 'Invalid email or password' : error.message);
       return;
     }
-
     toast.success('Welcome back!');
-    // Navigation will be handled by the useEffect above after auth state changes
   };
 
   const handleSignUp = async (data: SignUpFormData) => {
     setIsSubmitting(true);
     const { error } = await signUp(data.email, data.password, data.fullName);
     setIsSubmitting(false);
-
     if (error) {
-      if (error.message.includes('already registered')) {
-        toast.error('This email is already registered. Please sign in.');
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message.includes('already registered') ? 'This email is already registered. Please sign in.' : error.message);
       return;
     }
-
     toast.success('Account created successfully!');
-    // Navigation will be handled by the useEffect above after auth state changes
   };
 
   const handleForgotPassword = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
-    
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-
     setIsSubmitting(false);
-
     if (error) {
       toast.error(error.message);
       return;
     }
-
     setResetEmailSent(true);
     toast.success('Password reset email sent!');
   };
@@ -146,240 +116,154 @@ export default function Auth() {
     );
   }
 
+  const AuthFormCard = ({ children, title, description }: { children: React.ReactNode; title: string; description: string }) => (
+    <Card className="w-full max-w-md rounded-2xl shadow-premium border-0 bg-card">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+
   if (showForgotPassword) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        {/* Logo */}
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-            <MapPin className="h-5 w-5 text-primary-foreground" />
+      <div className="min-h-screen flex flex-col bg-background">
+        <div className="gradient-hero px-6 pt-12 pb-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-3 animate-float">
+            <MapPin className="h-8 w-8 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-semibold text-foreground">Discover Ukhrul</span>
+          <h1 className="text-2xl font-bold text-primary-foreground">Discover Ukhrul</h1>
         </div>
-
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reset Password</CardTitle>
-            <CardDescription>
-              {resetEmailSent 
-                ? "Check your email for a reset link"
-                : "Enter your email to receive a password reset link"
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="flex-1 flex items-start justify-center px-4 -mt-8">
+          <AuthFormCard title="Reset Password" description={resetEmailSent ? "Check your email for a reset link" : "Enter your email to receive a password reset link"}>
             {resetEmailSent ? (
               <div className="text-center space-y-4">
-                <p className="text-muted-foreground">
-                  We've sent a password reset link to your email. Please check your inbox.
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    setShowForgotPassword(false);
-                    setResetEmailSent(false);
-                  }}
-                >
+                <p className="text-muted-foreground text-sm">We've sent a password reset link to your email.</p>
+                <Button variant="outline" className="w-full rounded-xl" onClick={() => { setShowForgotPassword(false); setResetEmailSent(false); }}>
                   Back to Sign In
                 </Button>
               </div>
             ) : (
               <Form {...forgotPasswordForm}>
                 <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
-                  <FormField
-                    control={forgotPasswordForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      'Send Reset Link'
-                    )}
+                  <FormField control={forgotPasswordForm.control} name="email" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl><Input placeholder="you@example.com" type="email" className="rounded-xl h-11" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <Button type="submit" className="w-full rounded-xl h-11 font-semibold" disabled={isSubmitting}>
+                    {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</> : 'Send Reset Link'}
                   </Button>
-                  <Button 
-                    type="button"
-                    variant="ghost" 
-                    className="w-full"
-                    onClick={() => setShowForgotPassword(false)}
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Sign In
+                  <Button type="button" variant="ghost" className="w-full rounded-xl" onClick={() => setShowForgotPassword(false)}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />Back to Sign In
                   </Button>
                 </form>
               </Form>
             )}
-          </CardContent>
-        </Card>
+          </AuthFormCard>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      {/* Logo */}
-      <div className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-          <MapPin className="h-5 w-5 text-primary-foreground" />
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Gradient Header */}
+      <div className="gradient-hero px-6 pt-12 pb-16 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-primary-foreground/20 flex items-center justify-center mx-auto mb-3 animate-float">
+          <Sparkles className="h-8 w-8 text-primary-foreground" />
         </div>
-        <span className="text-2xl font-semibold text-foreground">Discover Ukhrul</span>
+        <h1 className="text-2xl font-bold text-primary-foreground">Discover Ukhrul</h1>
+        <p className="text-primary-foreground/70 text-sm mt-1">Shop, Explore & Travel Locally</p>
       </div>
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome</CardTitle>
-          <CardDescription>
-            Sign in to explore Ukhrul's businesses, places, and events
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
+      {/* Form Card */}
+      <div className="flex-1 flex items-start justify-center px-4 -mt-8">
+        <Card className="w-full max-w-md rounded-2xl shadow-premium border-0 bg-card">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
+            <CardDescription>Sign in to explore businesses, places, and events</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 rounded-xl h-11">
+                <TabsTrigger value="signin" className="rounded-lg font-semibold">Sign In</TabsTrigger>
+                <TabsTrigger value="signup" className="rounded-lg font-semibold">Sign Up</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="signin" className="mt-6">
-              <Form {...signInForm}>
-                <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-                  <FormField
-                    control={signInForm.control}
-                    name="email"
-                    render={({ field }) => (
+              <TabsContent value="signin" className="mt-6">
+                <Form {...signInForm}>
+                  <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+                    <FormField control={signInForm.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" type="email" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="you@example.com" type="email" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signInForm.control}
-                    name="password"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={signInForm.control} name="password" render={({ field }) => (
                       <FormItem>
                         <div className="flex items-center justify-between">
                           <FormLabel>Password</FormLabel>
-                          <Button
-                            type="button"
-                            variant="link"
-                            className="px-0 h-auto font-normal text-xs"
-                            onClick={() => setShowForgotPassword(true)}
-                          >
+                          <Button type="button" variant="link" className="px-0 h-auto font-normal text-xs" onClick={() => setShowForgotPassword(true)}>
                             Forgot password?
                           </Button>
                         </div>
-                        <FormControl>
-                          <Input placeholder="••••••••" type="password" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="••••••••" type="password" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      'Sign In'
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
+                    )} />
+                    <Button type="submit" className="w-full rounded-xl h-11 font-semibold shadow-premium" disabled={isSubmitting}>
+                      {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : 'Sign In'}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
 
-            <TabsContent value="signup" className="mt-6">
-              <Form {...signUpForm}>
-                <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
-                  <FormField
-                    control={signUpForm.control}
-                    name="fullName"
-                    render={({ field }) => (
+              <TabsContent value="signup" className="mt-6">
+                <Form {...signUpForm}>
+                  <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
+                    <FormField control={signUpForm.control} name="fullName" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="John Doe" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="email"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={signUpForm.control} name="email" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" type="email" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="you@example.com" type="email" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="password"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={signUpForm.control} name="password" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input placeholder="••••••••" type="password" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="••••••••" type="password" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signUpForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={signUpForm.control} name="confirmPassword" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input placeholder="••••••••" type="password" {...field} />
-                        </FormControl>
+                        <FormControl><Input placeholder="••••••••" type="password" className="rounded-xl h-11" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      'Create Account'
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <p className="mt-4 text-sm text-muted-foreground">
-        Shop, Explore & Travel Locally
-      </p>
+                    )} />
+                    <Button type="submit" className="w-full rounded-xl h-11 font-semibold shadow-premium" disabled={isSubmitting}>
+                      {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : 'Create Account'}
+                    </Button>
+                  </form>
+                </Form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
