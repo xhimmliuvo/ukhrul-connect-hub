@@ -2,3 +2,9 @@ project_id = "vusyqfnzogicfkkpocnq"
 
 [functions.calculate-delivery-fee]
 verify_jwt = false
+
+[functions.hub-forward-order]
+verify_jwt = false
+
+[functions.hub-check-status]
+verify_jwt = false
