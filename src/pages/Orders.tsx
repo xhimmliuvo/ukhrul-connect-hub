@@ -117,6 +117,7 @@ export default function Orders() {
       .select(`
         id, pickup_address, delivery_address, status, total_fee,
         agent_adjusted_fee, distance_km, weight_kg, created_at,
+        hub_order_id, hub_status,
         dropee_services (name),
         delivery_agents!delivery_orders_assigned_agent_id_fkey (full_name, agent_code)
       `)
