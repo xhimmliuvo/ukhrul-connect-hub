@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Heart, BadgeCheck } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSavedItems } from '@/hooks/useSavedItems';
@@ -57,46 +56,52 @@ export function BusinessCard({ business, variant = 'default', locationName }: Bu
 
   return (
     <Link to={`/businesses/${business.slug}`}>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow group">
+      <div className={cn(
+        "group rounded-2xl overflow-hidden bg-card border border-border/50 card-hover",
+        isCompact ? "" : ""
+      )}>
         {/* Image */}
-        <div className={cn("relative bg-muted", isCompact ? "h-24" : "h-36")}>
+        <div className={cn("relative bg-muted overflow-hidden", isCompact ? "h-28" : "h-44")}>
           {business.cover_image ? (
             <img
               src={business.cover_image}
               alt={business.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-muted-foreground" />
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <MapPin className="h-8 w-8 text-muted-foreground/50" />
             </div>
           )}
           
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
+
           {/* Save button */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background"
+            className="absolute top-2.5 right-2.5 h-9 w-9 rounded-xl glass hover:scale-110 transition-transform"
             onClick={handleSaveClick}
           >
             <Heart
               className={cn(
-                "h-4 w-4",
-                saved ? "fill-destructive text-destructive" : "text-foreground"
+                "h-4 w-4 transition-all",
+                saved ? "fill-destructive text-destructive scale-110" : "text-foreground"
               )}
             />
           </Button>
 
           {/* Featured badge */}
           {business.featured && (
-            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-              Featured
+            <Badge className="absolute top-2.5 left-2.5 rounded-lg gradient-warm text-primary-foreground border-0 font-semibold text-xs shadow-premium">
+              ★ Featured
             </Badge>
           )}
 
           {/* Location badge */}
           {locationName && (
-            <Badge variant="secondary" className="absolute bottom-2 left-2 text-xs bg-background/80 backdrop-blur-sm">
+            <Badge variant="secondary" className="absolute bottom-2.5 left-2.5 rounded-lg text-xs glass border-0">
               <MapPin className="h-3 w-3 mr-1" />
               {locationName}
             </Badge>
@@ -104,12 +109,12 @@ export function BusinessCard({ business, variant = 'default', locationName }: Bu
         </div>
 
         {/* Content */}
-        <CardContent className={cn("p-3", isCompact && "p-2")}>
+        <div className={cn("p-3.5", isCompact && "p-2.5")}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <h3 className={cn(
-                  "font-semibold text-foreground truncate",
+                  "font-bold text-foreground truncate",
                   isCompact ? "text-sm" : "text-base"
                 )}>
                   {business.name}
@@ -120,7 +125,7 @@ export function BusinessCard({ business, variant = 'default', locationName }: Bu
               </div>
               
               {business.categories && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {business.categories.name}
                 </p>
               )}
@@ -128,20 +133,17 @@ export function BusinessCard({ business, variant = 'default', locationName }: Bu
 
             {/* Rating */}
             {business.review_count > 0 && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                <span className="text-sm font-medium text-foreground">
+              <div className="flex items-center gap-1 flex-shrink-0 bg-accent/10 rounded-lg px-2 py-1">
+                <Star className="h-3.5 w-3.5 fill-accent text-accent" />
+                <span className="text-sm font-bold text-foreground">
                   {business.rating.toFixed(1)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  ({business.review_count})
                 </span>
               </div>
             )}
           </div>
 
           {!isCompact && business.short_description && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+            <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">
               {business.short_description}
             </p>
           )}
@@ -152,8 +154,8 @@ export function BusinessCard({ business, variant = 'default', locationName }: Bu
               <span className="truncate">{business.address}</span>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </Link>
   );
 }

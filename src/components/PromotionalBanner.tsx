@@ -23,9 +23,9 @@ interface PromotionalBannerProps {
 }
 
 const bannerTypeConfig = {
-  featured: { icon: Sparkles, label: 'Featured', color: 'bg-primary/10 text-primary' },
-  ad: { icon: Megaphone, label: 'Sponsored', color: 'bg-accent/10 text-accent-foreground' },
-  event: { icon: Calendar, label: 'Event', color: 'bg-secondary text-secondary-foreground' },
+  featured: { icon: Sparkles, label: 'Featured' },
+  ad: { icon: Megaphone, label: 'Sponsored' },
+  event: { icon: Calendar, label: 'Event' },
 };
 
 export function PromotionalBanner({ page, className }: PromotionalBannerProps) {
@@ -51,73 +51,76 @@ export function PromotionalBanner({ page, className }: PromotionalBannerProps) {
     fetchBanners();
   }, [page]);
 
-  // Auto-rotate banners
   useEffect(() => {
     if (banners.length <= 1) return;
-    
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, [banners.length]);
 
   if (loading || banners.length === 0) return null;
 
   const currentBanner = banners[currentIndex];
-  const { icon: Icon, label, color } = bannerTypeConfig[currentBanner.banner_type];
-
-  const goToPrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % banners.length);
-  };
+  const { icon: Icon, label } = bannerTypeConfig[currentBanner.banner_type];
 
   const BannerContent = (
     <div className={cn(
-      "relative overflow-hidden rounded-lg bg-card border transition-all duration-300 hover:shadow-md",
+      "relative overflow-hidden rounded-2xl transition-all duration-300 group",
+      currentBanner.image_url ? "h-40" : "gradient-primary p-5",
       className
     )}>
-      <div className="flex items-center gap-4 p-4">
-        {/* Image */}
-        {currentBanner.image_url && (
-          <div className="hidden sm:block flex-shrink-0 w-20 h-20 rounded-md overflow-hidden bg-muted">
-            <img
-              src={currentBanner.image_url}
-              alt={currentBanner.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+      {currentBanner.image_url ? (
+        <>
+          <img
+            src={currentBanner.image_url}
+            alt={currentBanner.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
+          <div className="absolute inset-0 p-5 flex flex-col justify-end">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-foreground/20 text-primary-foreground backdrop-blur-sm">
+                <Icon className="h-3 w-3" />
+                {label}
+              </span>
+            </div>
+            <h3 className="font-bold text-primary-foreground text-lg leading-tight">{currentBanner.title}</h3>
+            {currentBanner.subtitle && (
+              <p className="text-sm text-primary-foreground/80 mt-0.5">{currentBanner.subtitle}</p>
+            )}
+            {currentBanner.link_text && (
+              <span className="text-sm font-semibold text-primary-foreground mt-2 inline-flex items-center gap-1">
+                {currentBanner.link_text}
+                <ChevronRight className="h-4 w-4" />
+              </span>
+            )}
           </div>
-        )}
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", color)}>
+        </>
+      ) : (
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-foreground/20 text-primary-foreground">
               <Icon className="h-3 w-3" />
               {label}
             </span>
           </div>
-          <h3 className="font-medium text-foreground truncate">{currentBanner.title}</h3>
+          <h3 className="font-bold text-primary-foreground text-lg">{currentBanner.title}</h3>
           {currentBanner.subtitle && (
-            <p className="text-sm text-muted-foreground truncate">{currentBanner.subtitle}</p>
+            <p className="text-sm text-primary-foreground/80 mt-1">{currentBanner.subtitle}</p>
+          )}
+          {currentBanner.link_text && (
+            <Button size="sm" variant="secondary" className="mt-3 rounded-xl font-semibold">
+              {currentBanner.link_text}
+            </Button>
           )}
         </div>
+      )}
 
-        {/* CTA */}
-        {currentBanner.link_text && (
-          <Button variant="ghost" size="sm" className="flex-shrink-0 text-primary">
-            {currentBanner.link_text}
-          </Button>
-        )}
-      </div>
-
-      {/* Navigation dots */}
+      {/* Dots */}
       {banners.length > 1 && (
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
           {banners.map((_, idx) => (
             <button
               key={idx}
@@ -127,41 +130,13 @@ export function PromotionalBanner({ page, className }: PromotionalBannerProps) {
                 setCurrentIndex(idx);
               }}
               className={cn(
-                "w-1.5 h-1.5 rounded-full transition-all",
-                idx === currentIndex ? "bg-primary w-3" : "bg-muted-foreground/30"
+                "h-1.5 rounded-full transition-all",
+                idx === currentIndex ? "bg-primary-foreground w-4" : "bg-primary-foreground/40 w-1.5"
               )}
               aria-label={`Go to banner ${idx + 1}`}
             />
           ))}
         </div>
-      )}
-
-      {/* Arrow navigation for multiple banners */}
-      {banners.length > 1 && (
-        <>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              goToPrev();
-            }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 p-1 rounded-full bg-background/80 hover:bg-background shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-            aria-label="Previous banner"
-          >
-            <ChevronLeft className="h-4 w-4 text-foreground" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              goToNext();
-            }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-full bg-background/80 hover:bg-background shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-            aria-label="Next banner"
-          >
-            <ChevronRight className="h-4 w-4 text-foreground" />
-          </button>
-        </>
       )}
     </div>
   );

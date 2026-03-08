@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Heart, Mountain } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSavedItems } from '@/hooks/useSavedItems';
@@ -56,125 +55,92 @@ export function PlaceCard({ place, variant = 'default', locationName }: PlaceCar
 
   const isCompact = variant === 'compact';
 
-  const getDifficultyColor = (level: string | null) => {
-    switch (level) {
-      case 'easy': return 'bg-green-500/10 text-green-600';
-      case 'moderate': return 'bg-yellow-500/10 text-yellow-600';
-      case 'challenging': return 'bg-red-500/10 text-red-600';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
   return (
     <Link to={`/places/${place.slug}`}>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow group">
-        {/* Image */}
-        <div className={cn("relative bg-muted", isCompact ? "h-24" : "h-36")}>
-          {place.cover_image ? (
-            <img
-              src={place.cover_image}
-              alt={place.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Mountain className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
-          
-          {/* Save button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background"
-            onClick={handleSaveClick}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4",
-                saved ? "fill-destructive text-destructive" : "text-foreground"
-              )}
-            />
-          </Button>
+      <div className={cn(
+        "group rounded-2xl overflow-hidden relative card-hover",
+        isCompact ? "h-44" : "h-56"
+      )}>
+        {/* Full-bleed image */}
+        {place.cover_image ? (
+          <img
+            src={place.cover_image}
+            alt={place.name}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <Mountain className="h-10 w-10 text-muted-foreground/50" />
+          </div>
+        )}
+        
+        {/* Gradient overlay from bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
 
-          {/* Featured badge */}
-          {place.featured && (
-            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-              Featured
-            </Badge>
-          )}
+        {/* Save button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2.5 right-2.5 h-9 w-9 rounded-xl glass hover:scale-110 transition-transform z-10"
+          onClick={handleSaveClick}
+        >
+          <Heart
+            className={cn(
+              "h-4 w-4 transition-all",
+              saved ? "fill-destructive text-destructive scale-110" : "text-primary-foreground"
+            )}
+          />
+        </Button>
 
-          {/* Location badge */}
-          {locationName && (
-            <Badge variant="secondary" className="absolute bottom-2 right-2 text-xs bg-background/80 backdrop-blur-sm">
-              <MapPin className="h-3 w-3 mr-1" />
-              {locationName}
-            </Badge>
-          )}
+        {/* Featured badge */}
+        {place.featured && (
+          <Badge className="absolute top-2.5 left-2.5 rounded-lg gradient-warm text-primary-foreground border-0 font-semibold text-xs shadow-premium z-10">
+            ★ Featured
+          </Badge>
+        )}
 
-          {/* Entry fee badge */}
-          {!isCompact && place.entry_fee && place.entry_fee > 0 && (
-            <Badge variant="secondary" className="absolute bottom-2 left-2">
-              ₹{place.entry_fee}
-            </Badge>
-          )}
-        </div>
-
-        {/* Content */}
-        <CardContent className={cn("p-3", isCompact && "p-2")}>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
+        {/* Bottom overlay content */}
+        <div className="absolute bottom-0 left-0 right-0 p-3.5 z-10">
+          {/* Glass info bar */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
               <h3 className={cn(
-                "font-semibold text-foreground truncate",
+                "font-bold text-primary-foreground truncate",
                 isCompact ? "text-sm" : "text-base"
               )}>
                 {place.name}
               </h3>
-              
-              {place.categories && (
-                <p className="text-xs text-muted-foreground">
-                  {place.categories.name}
-                </p>
-              )}
-            </div>
-
-            {/* Rating */}
-            {(place.review_count ?? 0) > 0 && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                <span className="text-sm font-medium text-foreground">
-                  {Number(place.rating).toFixed(1)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  ({place.review_count})
-                </span>
-              </div>
-            )}
-          </div>
-
-          {!isCompact && place.short_description && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {place.short_description}
-            </p>
-          )}
-
-          {!isCompact && (
-            <div className="flex items-center gap-2 mt-2">
-              {place.difficulty_level && (
-                <Badge variant="outline" className={cn("text-xs", getDifficultyColor(place.difficulty_level))}>
-                  {place.difficulty_level}
-                </Badge>
-              )}
-              {place.address && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{place.address}</span>
+              {(place.review_count ?? 0) > 0 && (
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <Star className="h-3 w-3 fill-accent text-accent" />
+                  <span className="text-xs font-bold text-primary-foreground">
+                    {Number(place.rating).toFixed(1)}
+                  </span>
                 </div>
               )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {locationName && (
+                <span className="text-xs text-primary-foreground/80 flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {locationName}
+                </span>
+              )}
+              {place.entry_fee && place.entry_fee > 0 && (
+                <Badge variant="secondary" className="text-xs rounded-md bg-primary-foreground/20 text-primary-foreground border-0">
+                  ₹{place.entry_fee}
+                </Badge>
+              )}
+              {!isCompact && place.difficulty_level && (
+                <Badge variant="secondary" className="text-xs rounded-md bg-primary-foreground/20 text-primary-foreground border-0 capitalize">
+                  {place.difficulty_level}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }
