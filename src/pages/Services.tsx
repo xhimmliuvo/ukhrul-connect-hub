@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
+import { HubAgentsList } from '@/components/HubAgentsList';
 
 interface DropeeService {
   id: string;
@@ -61,6 +62,7 @@ export default function Services() {
   // Modal state
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<DropeeService | undefined>();
+  const [preferredAgentId, setPreferredAgentId] = useState<string | undefined>();
 
   useEffect(() => {
     fetchServices();
@@ -91,6 +93,12 @@ export default function Services() {
   function handleCloseModal() {
     setRequestModalOpen(false);
     setSelectedService(undefined);
+    setPreferredAgentId(undefined);
+  }
+
+  function handleRequestAgent(agentId: string) {
+    setPreferredAgentId(agentId);
+    setRequestModalOpen(true);
   }
 
   return (
@@ -187,6 +195,9 @@ export default function Services() {
             )}
           </div>
         </section>
+
+        {/* Live Agents */}
+        <HubAgentsList onRequestAgent={handleRequestAgent} />
       </main>
 
       <BottomNav />
