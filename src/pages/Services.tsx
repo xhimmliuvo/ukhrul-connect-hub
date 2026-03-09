@@ -195,6 +195,9 @@ export default function Services() {
             )}
           </div>
         </section>
+
+        {/* Live Agents */}
+        <HubAgentsList onRequestAgent={handleRequestAgent} />
       </main>
 
       <BottomNav />
