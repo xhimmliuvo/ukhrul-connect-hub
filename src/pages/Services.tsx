@@ -35,19 +35,6 @@ interface DropeeService {
   price: string;
 }
 
-interface DeliveryAgent {
-  id: string;
-  agent_code: string;
-  full_name: string;
-  phone: string | null;
-  avatar_url: string | null;
-  vehicle_type: string;
-  rating: number | null;
-  total_deliveries: number;
-  agent_availability: {
-    status: string;
-  } | null;
-}
 
 const iconMap: Record<string, LucideIcon> = {
   Truck,
