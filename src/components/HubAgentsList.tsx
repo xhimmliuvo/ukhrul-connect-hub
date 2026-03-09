@@ -128,9 +128,17 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="h-5 w-5" /> Live Hub Agents
-        </h2>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="h-5 w-5" /> Live Hub Agents
+          </h2>
+          {lastUpdated && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+              <Clock className="h-3 w-3" />
+              Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
+            </p>
+          )}
+        </div>
         <Button variant="ghost" size="sm" onClick={fetchAgents}>
           <RefreshCw className="h-4 w-4" />
         </Button>
