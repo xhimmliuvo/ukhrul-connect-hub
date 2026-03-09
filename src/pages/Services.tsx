@@ -96,64 +96,15 @@ export default function Services() {
     setLoading(false);
   }
 
-  async function fetchAgents() {
-    setAgentsLoading(true);
-    let query = supabase
-      .from('delivery_agents')
-      .select(`
-        id,
-        agent_code,
-        full_name,
-        phone,
-        avatar_url,
-        vehicle_type,
-        rating,
-        total_deliveries,
-        agent_availability (status)
-      `)
-      .eq('is_active', true)
-      .eq('is_verified', true)
-      .order('rating', { ascending: false });
-
-    if (currentArea) {
-      query = query.or(`service_area_id.eq.${currentArea.id},service_area_id.is.null`);
-    }
-
-    const { data } = await query;
-    
-    // Sort agents: online first, then busy, then offline
-    const sortedAgents = (data || []).sort((a, b) => {
-      const statusOrder: Record<string, number> = { online: 0, busy: 1, offline: 2 };
-      const statusA = a.agent_availability?.status || 'offline';
-      const statusB = b.agent_availability?.status || 'offline';
-      return (statusOrder[statusA] || 2) - (statusOrder[statusB] || 2);
-    });
-    
-    setAgents(sortedAgents as DeliveryAgent[]);
-    setAgentsLoading(false);
-  }
-
-  function handleRequestAgent(agentId: string) {
-    setPreferredAgentId(agentId);
-    setSelectedService(undefined);
-    setRequestModalOpen(true);
-  }
-
   function handleRequestService(service: DropeeService) {
     setSelectedService(service);
-    setPreferredAgentId(undefined);
     setRequestModalOpen(true);
   }
 
   function handleCloseModal() {
     setRequestModalOpen(false);
     setSelectedService(undefined);
-    setPreferredAgentId(undefined);
   }
-
-  const onlineAgentsCount = agents.filter(
-    a => a.agent_availability?.status === 'online'
-  ).length;
 
   return (
     <div className="min-h-screen bg-background pb-20">
