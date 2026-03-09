@@ -30,6 +30,10 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
 
   useEffect(() => {
     fetchAgents();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchAgents, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   async function fetchAgents() {
