@@ -5,7 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Users, RefreshCw } from 'lucide-react';
+import { AlertCircle, Users, RefreshCw, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface HubAgent {
   id: string;
