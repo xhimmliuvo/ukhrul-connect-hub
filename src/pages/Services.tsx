@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LocationBanner } from '@/components/LocationBanner';
 import { BottomNav } from '@/components/BottomNav';
-import { AgentCard } from '@/components/AgentCard';
 import { ServiceRequestModal } from '@/components/dropee/ServiceRequestModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ import {
   Newspaper,
   Mail,
   LucideIcon,
-  Users,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
