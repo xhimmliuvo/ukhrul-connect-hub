@@ -62,6 +62,7 @@ export default function Services() {
   // Modal state
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<DropeeService | undefined>();
+  const [preferredAgentId, setPreferredAgentId] = useState<string | undefined>();
 
   useEffect(() => {
     fetchServices();
