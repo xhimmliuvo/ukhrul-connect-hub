@@ -135,7 +135,7 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
           {lastUpdated && (
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
               <Clock className="h-3 w-3" />
-              Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
+              Via API Hub • Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
             </p>
           )}
         </div>
