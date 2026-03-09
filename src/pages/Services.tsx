@@ -93,6 +93,12 @@ export default function Services() {
   function handleCloseModal() {
     setRequestModalOpen(false);
     setSelectedService(undefined);
+    setPreferredAgentId(undefined);
+  }
+
+  function handleRequestAgent(agentId: string) {
+    setPreferredAgentId(agentId);
+    setRequestModalOpen(true);
   }
 
   return (
