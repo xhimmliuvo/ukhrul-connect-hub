@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.hub-check-status]
 verify_jwt = false
+
+[functions.hub-agents]
+verify_jwt = false
