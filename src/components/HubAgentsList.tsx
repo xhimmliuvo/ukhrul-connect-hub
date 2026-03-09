@@ -36,7 +36,12 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
     
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchAgents, 30000);
-    return () => clearInterval(interval);
+    // Update relative time display every 10 seconds
+    const tickInterval = setInterval(() => setTick(t => t + 1), 10000);
+    return () => {
+      clearInterval(interval);
+      clearInterval(tickInterval);
+    };
   }, []);
 
   async function fetchAgents() {
@@ -48,6 +53,7 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
       if (fnError) throw fnError;
 
       setAgents(data?.agents || []);
+      setLastUpdated(new Date());
     } catch (e: any) {
       console.error('Hub agents error:', e);
       setError(e.message || 'Failed to load agents from hub');
