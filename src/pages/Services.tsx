@@ -68,19 +68,15 @@ const iconMap: Record<string, LucideIcon> = {
 
 export default function Services() {
   const [services, setServices] = useState<DropeeService[]>([]);
-  const [agents, setAgents] = useState<DeliveryAgent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [agentsLoading, setAgentsLoading] = useState(true);
   const { currentArea } = useServiceAreaContext();
   
   // Modal state
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<DropeeService | undefined>();
-  const [preferredAgentId, setPreferredAgentId] = useState<string | undefined>();
 
   useEffect(() => {
     fetchServices();
-    fetchAgents();
   }, [currentArea]);
 
   async function fetchServices() {
