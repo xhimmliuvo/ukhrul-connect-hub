@@ -4,7 +4,8 @@ import { AgentCard } from '@/components/AgentCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Users, RefreshCw } from 'lucide-react';
 
 interface HubAgent {
   id: string;
@@ -15,7 +16,7 @@ interface HubAgent {
   vehicle_type: string;
   rating: number | null;
   total_deliveries: number;
-  agent_availability: { status: string } | null;
+  agent_availability?: { status: string } | null;
 }
 
 interface HubAgentsListProps {
@@ -35,17 +36,14 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: dbError } = await supabase
-        .from('delivery_agents')
-        .select('id, agent_code, full_name, phone, avatar_url, vehicle_type, rating, total_deliveries, agent_availability(status)')
-        .eq('is_active', true)
-        .eq('is_verified', true);
+      const { data, error: fnError } = await supabase.functions.invoke('hub-agents');
 
-      if (dbError) throw dbError;
+      if (fnError) throw fnError;
 
-      setAgents((data as unknown as HubAgent[]) || []);
+      setAgents(data?.agents || []);
     } catch (e: any) {
-      setError(e.message || 'Failed to load agents');
+      console.error('Hub agents error:', e);
+      setError(e.message || 'Failed to load agents from hub');
     } finally {
       setLoading(false);
     }
@@ -55,7 +53,7 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
     return (
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="h-5 w-5" /> Available Agents
+          <Users className="h-5 w-5" /> Live Hub Agents
         </h2>
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -79,11 +77,16 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
     return (
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="h-5 w-5" /> Available Agents
+          <Users className="h-5 w-5" /> Live Hub Agents
         </h2>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button variant="ghost" size="sm" onClick={fetchAgents}>
+              <RefreshCw className="h-4 w-4 mr-1" /> Retry
+            </Button>
+          </AlertDescription>
         </Alert>
       </section>
     );
@@ -92,12 +95,17 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
   if (agents.length === 0) {
     return (
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="h-5 w-5" /> Available Agents
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="h-5 w-5" /> Live Hub Agents
+          </h2>
+          <Button variant="ghost" size="sm" onClick={fetchAgents}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
         <Card>
           <CardContent className="p-6 text-center text-muted-foreground">
-            No delivery agents available at the moment.
+            No delivery agents available from the hub at the moment.
           </CardContent>
         </Card>
       </section>
@@ -106,9 +114,14 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <Users className="h-5 w-5" /> Available Agents
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Users className="h-5 w-5" /> Live Hub Agents
+        </h2>
+        <Button variant="ghost" size="sm" onClick={fetchAgents}>
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+      </div>
       <div className="space-y-3">
         {agents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} onRequestAgent={onRequestAgent} />
