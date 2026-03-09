@@ -35,40 +35,29 @@ Deno.serve(async (req) => {
       });
     }
 
-    const hubUrl = Deno.env.get("HUB_URL")!;
-    const hubApiKey = Deno.env.get("HUB_API_KEY")!;
+    // Query agents from local DB using service role
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
-    // Fetch agents from the hub
-    const hubResponse = await fetch(`${hubUrl}/api/delivery/agents`, {
-      method: "GET",
-      headers: {
-        "x-api-key": hubApiKey,
-        "Content-Type": "application/json",
-      },
-    });
+    const { data: agents, error: dbError } = await supabaseAdmin
+      .from("delivery_agents")
+      .select("id, agent_code, full_name, phone, avatar_url, vehicle_type, rating, total_deliveries, agent_availability(status)")
+      .eq("is_active", true)
+      .eq("is_verified", true);
 
-    if (!hubResponse.ok) {
-      const errorText = await hubResponse.text();
-      console.error("Hub agents fetch error:", hubResponse.status, errorText);
+    if (dbError) {
+      console.error("DB error fetching agents:", dbError);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch agents from hub", agents: [] }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: "Failed to fetch agents", agents: [] }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const hubData = await hubResponse.json();
-
     return new Response(
-      JSON.stringify({
-        agents: hubData.agents || hubData || [],
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      JSON.stringify({ agents: agents || [] }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
     console.error("Error:", err);
