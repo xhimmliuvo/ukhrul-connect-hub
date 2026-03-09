@@ -200,54 +200,6 @@ export default function Services() {
             )}
           </div>
         </section>
-
-        {/* Available Agents Section */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Available Agents</h2>
-            </div>
-            {onlineAgentsCount > 0 && (
-              <span className="text-sm text-muted-foreground">
-                {onlineAgentsCount} online
-              </span>
-            )}
-          </div>
-
-          <div className="space-y-3">
-            {agentsLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <Skeleton className="h-14 w-14 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-5 w-40" />
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-6 w-20" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : agents.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>No agents available in your area yet.</p>
-                  <p className="text-sm mt-1">Check back soon!</p>
-                </CardContent>
-              </Card>
-            ) : (
-              agents.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  agent={agent}
-                  onRequestAgent={handleRequestAgent}
-                />
-              ))
-            )}
-          </div>
-        </section>
       </main>
 
       <BottomNav />
@@ -256,7 +208,6 @@ export default function Services() {
         isOpen={requestModalOpen}
         onClose={handleCloseModal}
         service={selectedService}
-        preferredAgentId={preferredAgentId}
       />
     </div>
   );
