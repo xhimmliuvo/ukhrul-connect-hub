@@ -28,6 +28,8 @@ export function HubAgentsList({ onRequestAgent }: HubAgentsListProps) {
   const [agents, setAgents] = useState<HubAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     fetchAgents();
