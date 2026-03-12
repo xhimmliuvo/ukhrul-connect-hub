@@ -17,7 +17,11 @@ import {
   Flame,
   Loader2,
   Truck,
-  Sparkles
+  Sparkles,
+  Shield,
+  Map,
+  Calendar,
+  Store
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +37,7 @@ const menuItems = [
 export default function Profile() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
-  const { isAgent } = useUserRoles();
+  const { isAgent, isAdmin, isTouristGuide, isEventsManager, isBusinessOwner } = useUserRoles();
   const [streak, setStreak] = useState(0);
   const [points, setPoints] = useState(0);
   const streakUpdated = useRef(false);
@@ -156,7 +160,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Agent Panel */}
+        {/* Role-based Quick Access */}
         {isAgent && (
           <Link to="/agent">
             <div className="glass rounded-2xl p-4 flex items-center justify-between card-hover border border-primary/20">
@@ -173,6 +177,73 @@ export default function Profile() {
             </div>
           </Link>
         )}
+
+        {isAdmin && (
+          <Link to="/admin">
+            <div className="glass rounded-2xl p-4 flex items-center justify-between card-hover border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl gradient-warm flex items-center justify-center shadow-premium">
+                  <Shield className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">Admin Panel</p>
+                  <p className="text-xs text-muted-foreground">Manage everything</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-primary" />
+            </div>
+          </Link>
+        )}
+
+        {isTouristGuide && (
+          <Link to="/guide">
+            <div className="glass rounded-2xl p-4 flex items-center justify-between card-hover border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center">
+                  <Map className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">Guide Dashboard</p>
+                  <p className="text-xs text-muted-foreground">Manage tours & bookings</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-primary" />
+            </div>
+          </Link>
+        )}
+
+        {isEventsManager && (
+          <Link to="/events-manager">
+            <div className="glass rounded-2xl p-4 flex items-center justify-between card-hover border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">Events Manager</p>
+                  <p className="text-xs text-muted-foreground">Create & manage events</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-primary" />
+            </div>
+          </Link>
+        )}
+
+        {/* My Business Link */}
+        <Link to="/my-businesses">
+          <div className="glass rounded-2xl p-4 flex items-center justify-between card-hover border border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+                <Store className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-bold text-foreground">My Businesses</p>
+                <p className="text-xs text-muted-foreground">Add & manage your business</p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </Link>
 
         {/* Menu Items */}
         <div className="space-y-2">

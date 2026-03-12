@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Menu,
   User,
+  Store,
   Truck,
   Settings,
   ShoppingBag,
@@ -37,6 +38,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: User, label: 'My Profile', path: '/profile', requiresAuth: true },
+  { icon: Store, label: 'My Businesses', path: '/my-businesses', requiresAuth: true },
   { icon: Truck, label: 'Dropee Services', path: '/services' },
   { icon: ShoppingBag, label: 'My Orders', path: '/orders', requiresAuth: true },
   { icon: Star, label: 'My Reviews', path: '/reviews', requiresAuth: true },

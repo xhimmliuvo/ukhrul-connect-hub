@@ -50,6 +50,9 @@ import AgentCompleteDelivery from "./pages/agent/AgentCompleteDelivery";
 import AgentEarnings from "./pages/agent/AgentEarnings";
 import AgentProfile from "./pages/agent/AgentProfile";
 import TrackOrder from "./pages/TrackOrder";
+import AddBusiness from "./pages/AddBusiness";
+import MyBusinesses from "./pages/MyBusinesses";
+import ManageBusiness from "./pages/ManageBusiness";
 
 // Guide & Events Manager pages
 import GuideDashboard from "./pages/guide/GuideDashboard";
@@ -118,6 +121,11 @@ const App = () => (
               
               {/* Tracking route */}
               <Route path="/track/:orderId" element={<TrackOrder />} />
+              
+              {/* Business management routes */}
+              <Route path="/add-business" element={<AddBusiness />} />
+              <Route path="/my-businesses" element={<MyBusinesses />} />
+              <Route path="/manage-business/:id" element={<ManageBusiness />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface Business {
   id: string;
@@ -33,6 +35,7 @@ interface Category {
 }
 
 export default function Businesses() {
+  const { user } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -99,9 +102,16 @@ export default function Businesses() {
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Businesses</h1>
-          <Button variant="outline" size="icon" className="rounded-xl">
-            <SlidersHorizontal className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            {user && (
+              <Button variant="default" size="sm" className="rounded-xl gap-1" asChild>
+                <Link to="/add-business"><Plus className="h-4 w-4" />Add Yours</Link>
+              </Button>
+            )}
+            <Button variant="outline" size="icon" className="rounded-xl">
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Sticky glass search */}
