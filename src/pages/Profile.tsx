@@ -17,7 +17,11 @@ import {
   Flame,
   Loader2,
   Truck,
-  Sparkles
+  Sparkles,
+  Shield,
+  Map,
+  Calendar,
+  Store
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
