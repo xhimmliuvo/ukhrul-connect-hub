@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Menu,
   User,
+  Store,
   Truck,
   Settings,
   ShoppingBag,
