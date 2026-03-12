@@ -35,6 +35,7 @@ interface Category {
 }
 
 export default function Businesses() {
+  const { user } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
