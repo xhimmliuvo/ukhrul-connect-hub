@@ -102,9 +102,16 @@ export default function Businesses() {
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Businesses</h1>
-          <Button variant="outline" size="icon" className="rounded-xl">
-            <SlidersHorizontal className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            {user && (
+              <Button variant="default" size="sm" className="rounded-xl gap-1" asChild>
+                <Link to="/add-business"><Plus className="h-4 w-4" />Add Yours</Link>
+              </Button>
+            )}
+            <Button variant="outline" size="icon" className="rounded-xl">
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Sticky glass search */}
