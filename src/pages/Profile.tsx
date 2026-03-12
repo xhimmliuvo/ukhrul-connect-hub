@@ -37,7 +37,7 @@ const menuItems = [
 export default function Profile() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
-  const { isAgent } = useUserRoles();
+  const { isAgent, isAdmin, isTouristGuide, isEventsManager, isBusinessOwner } = useUserRoles();
   const [streak, setStreak] = useState(0);
   const [points, setPoints] = useState(0);
   const streakUpdated = useRef(false);
