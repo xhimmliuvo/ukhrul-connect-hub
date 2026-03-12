@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Map, Star, Users, Globe, Home, LogOut, Edit, Save, X,
+  Map as MapIcon, Star, Users, Globe, Home, LogOut, Edit, Save, X,
   MessageSquare, DollarSign, Check, Clock, Send, BarChart3
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
