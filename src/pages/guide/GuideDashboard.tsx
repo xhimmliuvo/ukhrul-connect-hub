@@ -125,7 +125,7 @@ export default function GuideDashboard() {
         .select('id, full_name, phone')
         .in('id', touristIds);
 
-      const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+      const profileMap = new Map<string, { id: string; full_name: string | null; phone: string | null }>((profiles || []).map(p => [p.id, p] as const));
       setBookings(data.map(b => ({
         ...b,
         tourist_profile: profileMap.get(b.tourist_user_id) || null,
