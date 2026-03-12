@@ -190,6 +190,7 @@ export type Database = {
         Row: {
           active: boolean | null
           address: string | null
+          approval_status: string | null
           business_type: string | null
           can_take_bookings: boolean | null
           category_id: string | null
@@ -221,6 +222,7 @@ export type Database = {
         Insert: {
           active?: boolean | null
           address?: string | null
+          approval_status?: string | null
           business_type?: string | null
           can_take_bookings?: boolean | null
           category_id?: string | null
@@ -252,6 +254,7 @@ export type Database = {
         Update: {
           active?: boolean | null
           address?: string | null
+          approval_status?: string | null
           business_type?: string | null
           can_take_bookings?: boolean | null
           category_id?: string | null
@@ -329,6 +332,41 @@ export type Database = {
           type?: Database["public"]["Enums"]["category_type"]
         }
         Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          sender_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          sender_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "tour_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       delivery_agents: {
         Row: {
@@ -781,6 +819,7 @@ export type Database = {
           images: string[] | null
           location_lat: number | null
           location_lng: number | null
+          manager_id: string | null
           name: string
           organizer: string | null
           organizer_contact: string | null
@@ -806,6 +845,7 @@ export type Database = {
           images?: string[] | null
           location_lat?: number | null
           location_lng?: number | null
+          manager_id?: string | null
           name: string
           organizer?: string | null
           organizer_contact?: string | null
@@ -831,6 +871,7 @@ export type Database = {
           images?: string[] | null
           location_lat?: number | null
           location_lng?: number | null
+          manager_id?: string | null
           name?: string
           organizer?: string | null
           organizer_contact?: string | null
@@ -1425,6 +1466,56 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      tour_bookings: {
+        Row: {
+          created_at: string
+          group_size: number | null
+          guide_id: string
+          id: string
+          notes: string | null
+          status: string
+          total_amount: number | null
+          tour_date: string
+          tour_time: string | null
+          tourist_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          group_size?: number | null
+          guide_id: string
+          id?: string
+          notes?: string | null
+          status?: string
+          total_amount?: number | null
+          tour_date: string
+          tour_time?: string | null
+          tourist_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          group_size?: number | null
+          guide_id?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          total_amount?: number | null
+          tour_date?: string
+          tour_time?: string | null
+          tourist_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_bookings_guide_id_fkey"
+            columns: ["guide_id"]
+            isOneToOne: false
+            referencedRelation: "guide_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
