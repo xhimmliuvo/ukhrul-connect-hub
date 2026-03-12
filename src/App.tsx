@@ -50,6 +50,9 @@ import AgentCompleteDelivery from "./pages/agent/AgentCompleteDelivery";
 import AgentEarnings from "./pages/agent/AgentEarnings";
 import AgentProfile from "./pages/agent/AgentProfile";
 import TrackOrder from "./pages/TrackOrder";
+import AddBusiness from "./pages/AddBusiness";
+import MyBusinesses from "./pages/MyBusinesses";
+import ManageBusiness from "./pages/ManageBusiness";
 
 // Guide & Events Manager pages
 import GuideDashboard from "./pages/guide/GuideDashboard";
