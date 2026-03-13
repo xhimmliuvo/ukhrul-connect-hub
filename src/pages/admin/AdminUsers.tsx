@@ -161,6 +161,8 @@ export default function AdminUsers() {
       business_owner: 'secondary',
       user: 'outline',
       agent: 'secondary',
+      tourist_guide: 'secondary',
+      events_manager: 'secondary',
     };
     return variants[role];
   };
