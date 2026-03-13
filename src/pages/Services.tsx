@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceAreaContext } from '@/contexts/ServiceAreaContext';
-import { HubAgentsList } from '@/components/HubAgentsList';
+
 
 interface DropeeService {
   id: string;
