@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.hub-agents]
 verify_jwt = false
+
+[functions.notify-admin-whatsapp]
+verify_jwt = false
